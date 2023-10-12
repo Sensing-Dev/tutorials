@@ -18,9 +18,9 @@ elif os.name == 'posix':
 if __name__ == "__main__":
 
     # device information
-    width = 640
-    height = 480
-    pixelformat = "Mono12"
+    width = 1280
+    height = 960
+    pixelformat = "RGB8"
     num_device = 1
 
     # the following items varies by PixelFormat
@@ -86,6 +86,10 @@ if __name__ == "__main__":
 
     # prepare Opencv 
     buf_size_opencv = (height, width)
+    output_byte_size = width*height*depth_in_byte
+    if pixelformat == "RGB8":
+        buf_size_opencv += (3,)
+        output_byte_size *= 3
 
     loop_num = 100
 
@@ -94,7 +98,7 @@ if __name__ == "__main__":
 
         # running the builder
         builder.run(port_map)
-        output_bytes = outputs[0].read(width*height*depth_in_byte) 
+        output_bytes = outputs[0].read(output_byte_size) 
 
         output_np_HxW = np.frombuffer(output_bytes, data_type).reshape(buf_size_opencv)
         output_np_HxW *= pow(2, num_bit_shift)
