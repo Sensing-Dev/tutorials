@@ -52,8 +52,8 @@ if __name__ == "__main__":
     num_devices = Param('num_devices', str(num_device))
     pixel_format_ptr = Param('pixel_format_ptr', pixelformat)
     frame_sync = Param('frame_sync', 'false')
-    gain_key = Param('gain_key', 'SensorGain')
-    exposure_key = Param('exposure_key', 'SensorShutter')
+    gain_key = Param('gain_key', 'Gain')
+    exposure_key = Param('exposure_key', 'ExposureTime')
     realtime_diaplay_mode = Param('realtime_diaplay_mode', 'true')
 
     # add a node to pipeline
