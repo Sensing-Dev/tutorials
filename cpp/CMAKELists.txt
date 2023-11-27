@@ -19,9 +19,16 @@ add_executable(tutorial0_get_device_info ${T0})
 target_compile_features(tutorial0_get_device_info PUBLIC cxx_std_17)
 
 target_link_libraries(tutorial0_get_device_info PRIVATE aravis-0.8.lib)
-# target_link_libraries(tutorial0_get_device_info PRIVATE opencv_world452.lib)
-# target_link_libraries(tutorial0_get_device_info PRIVATE ion-core.lib)
-# target_link_libraries(tutorial0_get_device_info PRIVATE halide.lib)
+
+# tutorial 1
+set(T1 src/tutorial1_display.cpp)
+add_executable(tutorial1_display ${T1})
+target_compile_features(tutorial1_display PUBLIC cxx_std_17)
+
+# target_link_libraries(tutorieal1_display PRIVATE aravis-0.8.lib)
+target_link_libraries(tutorial1_display PRIVATE opencv_world455.lib)
+target_link_libraries(tutorial1_display PRIVATE ion-core.lib)
+target_link_libraries(tutorial1_display PRIVATE halide.lib)
 
 #
 # Allow big object
