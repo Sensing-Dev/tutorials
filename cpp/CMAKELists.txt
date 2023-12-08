@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(SENSING_DEV_DIR ${SENSING_DEV_ROOT})
+set(SENSING_DEV_DIR $ENV{SENSING_DEV_ROOT})
 
 # opencv ion and halide
 include_directories(${SENSING_DEV_DIR}/include)
@@ -19,6 +19,7 @@ add_executable(tutorial0_get_device_info ${T0})
 target_compile_features(tutorial0_get_device_info PUBLIC cxx_std_17)
 
 target_link_libraries(tutorial0_get_device_info PRIVATE aravis-0.8.lib)
+target_link_libraries(tutorial0_get_device_info PRIVATE gobject-2.0.lib)
 
 # tutorial 1
 set(T1 src/tutorial1_display.cpp)
