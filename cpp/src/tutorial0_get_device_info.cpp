@@ -48,6 +48,8 @@ int main(int argc, char *argv[])
         if (error){
             throw std::runtime_error(error->message);
         }
+
+        g_object_unref (device);
     }
 
     return 0;
