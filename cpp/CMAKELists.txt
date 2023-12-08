@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(SENSING_DEV_DIR $ENV${SENSING_DEV_ROOT})
+set(SENSING_DEV_DIR $ENV{SENSING_DEV_ROOT})
 
 # opencv ion and halide
 include_directories(${SENSING_DEV_DIR}/include)
