@@ -104,7 +104,7 @@ if __name__ == "__main__":
         output_np_HxW *= pow(2, num_bit_shift)
 
         cv2.imshow("A", output_np_HxW)
-        cv2.waitKey(0)
+        cv2.waitKey(1)
 
     cv2.destroyAllWindows()
 

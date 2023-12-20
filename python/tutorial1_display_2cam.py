@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
         cv2.imshow("A", output_np_HxW_image0)
         cv2.imshow("B", output_np_HxW_image1)
-        cv2.waitKey(0)
+        cv2.waitKey(1)
 
     cv2.destroyAllWindows()
 
