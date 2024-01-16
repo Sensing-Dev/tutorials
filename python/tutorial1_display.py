@@ -45,14 +45,14 @@ if __name__ == "__main__":
     output_p = node.get_port('output')
 
     # create halide buffer for output port
-    outputs = []
-    output_size = (width, height, )
+    output_size = (height, width, )
     if pixelformat == "RGB8":
         output_size += (3,)
-    outputs.append(Buffer(Type(TypeCode.Uint, depth_of_buffer, 1), output_size))
+    output_data = np.full(output_size, fill_value=0, dtype=data_type)
+    output = Buffer(array= output_data)
 
     # set I/O ports
-    output_p[0].bind(outputs[0])
+    output_p[0].bind(output)
 
     # prepare Opencv 
     buf_size_opencv = (height, width)
@@ -67,12 +67,9 @@ if __name__ == "__main__":
     while(user_input == -1):
         # running the builder
         builder.run()
-        output_bytes = outputs[0].read(output_byte_size) 
+        output_data *= coef
 
-        output_np_HxW = np.frombuffer(output_bytes, data_type).reshape(buf_size_opencv)
-        output_np_HxW *= coef
-
-        cv2.imshow("img", output_np_HxW)
+        cv2.imshow("img", output_data)
         user_input = cv2.waitKeyEx(1)
 
     cv2.destroyAllWindows()

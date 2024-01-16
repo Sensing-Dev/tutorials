@@ -66,11 +66,13 @@ if __name__ == "__main__":
 
     # create halide buffer for output port
     outputs = []
-    output_size = (width, height, )
+    output_datas = []
+    output_size = (height, width, )
     if pixelformat == "RGB8":
         output_size += (3,)
     for i in range(num_device):
-        outputs.append(Buffer(Type(TypeCode.Uint, depth_of_buffer, 1), output_size))
+        output_datas.append(np.full(output_size, fill_value=0, dtype=data_type))
+        outputs.append(Buffer(array= output_datas[i]))
 
     # set I/O ports
     for i in range(num_device):
@@ -91,13 +93,11 @@ if __name__ == "__main__":
     while(user_input == -1):
         # running the builder
         builder.run()
+        
         for i in range(num_device):
-            output_bytes = outputs[i].read(output_byte_size) 
+            output_datas[i] *= coef
 
-            output_np_HxW = np.frombuffer(output_bytes, data_type).reshape(buf_size_opencv)
-            output_np_HxW *= coef
-
-            cv2.imshow("img" + str(i), output_np_HxW)
+            cv2.imshow("img" + str(i), output_datas[i])
         user_input = cv2.waitKeyEx(1)
 
     cv2.destroyAllWindows()
