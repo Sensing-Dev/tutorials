@@ -51,10 +51,13 @@ int video(int width, int height, std::string pixel_format, int num_device){
         buf_size.push_back(3);
     }
     std::vector<Halide::Buffer<T>> output;
+    std::vector<Halide::Buffer<uint32_t>> frame_counts;
     for (int i = 0; i < num_device; ++i){
       output.push_back(Halide::Buffer<T>(buf_size));
+      frame_counts.push_back(Halide::Buffer<uint32_t>(1));
     }
     n["output"].bind(output);
+    n["frame_count"].bind(frame_counts);
 
     int coef =  positive_pow(2, num_bit_shift_map[pixel_format]);
     int user_input = -1;
@@ -81,6 +84,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
 
       // Wait for 1ms
       user_input = cv::waitKeyEx(1);
+      std::cout << frame_counts[0](0) << std::endl;
     }
     return 0;
 }

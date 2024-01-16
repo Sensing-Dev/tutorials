@@ -79,9 +79,10 @@ int video(int width, int height, std::string pixel_format, int num_device){
     }
     n["output"].bind(output);
 
-    int loop_num = 100;
     int coef =  positive_pow(2, num_bit_shift_map[pixel_format]);
-    for (int i = 0; i < loop_num; ++i)
+    int user_input = -1;
+
+    while(user_input == -1)
     {
       // JIT compilation and execution of pipelines with Builder.
       try {
@@ -101,7 +102,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
       }
 
       // Wait for 1ms
-      cv::waitKey(1);
+      user_input = cv::waitKeyEx(1);
     }
     return 0;
 }

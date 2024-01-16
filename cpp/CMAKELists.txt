@@ -31,7 +31,7 @@ target_link_libraries(tutorial1_display PRIVATE opencv_world455.lib)
 target_link_libraries(tutorial1_display PRIVATE ion-core.lib)
 target_link_libraries(tutorial1_display PRIVATE halide.lib)
 
-# tutorial 1
+# tutorial 2
 set(T2 src/tutorial2_control_camera.cpp)
 add_executable(tutorial2_control_camera ${T2})
 target_compile_features(tutorial2_control_camera PUBLIC cxx_std_17)
@@ -39,6 +39,15 @@ target_compile_features(tutorial2_control_camera PUBLIC cxx_std_17)
 target_link_libraries(tutorial2_control_camera PRIVATE opencv_world455.lib)
 target_link_libraries(tutorial2_control_camera PRIVATE ion-core.lib)
 target_link_libraries(tutorial2_control_camera PRIVATE halide.lib)
+
+# tutorial 3
+set(T3 src/tutorial3_getting_frame_count.cpp)
+add_executable(tutorial3_getting_frame_count ${T3})
+target_compile_features(tutorial3_getting_frame_count PUBLIC cxx_std_17)
+
+target_link_libraries(tutorial3_getting_frame_count PRIVATE opencv_world455.lib)
+target_link_libraries(tutorial3_getting_frame_count PRIVATE ion-core.lib)
+target_link_libraries(tutorial3_getting_frame_count PRIVATE halide.lib)
 
 #
 # Allow big object
