@@ -11,9 +11,10 @@ include_directories(${SENSING_DEV_DIR}/include)
 link_directories(${SENSING_DEV_DIR}/bin)
 link_directories(${SENSING_DEV_DIR}/lib)
 
-# tutorial 0
 include_directories(${SENSING_DEV_DIR}/include/aravis-0.8)
 include_directories(${SENSING_DEV_DIR}/include/glib-2.0)
+
+# tutorial 0
 set(T0 src/tutorial0_get_device_info.cpp)
 add_executable(tutorial0_get_device_info ${T0})
 target_compile_features(tutorial0_get_device_info PUBLIC cxx_std_17)
@@ -26,10 +27,18 @@ set(T1 src/tutorial1_display.cpp)
 add_executable(tutorial1_display ${T1})
 target_compile_features(tutorial1_display PUBLIC cxx_std_17)
 
-# target_link_libraries(tutorieal1_display PRIVATE aravis-0.8.lib)
 target_link_libraries(tutorial1_display PRIVATE opencv_world455.lib)
 target_link_libraries(tutorial1_display PRIVATE ion-core.lib)
 target_link_libraries(tutorial1_display PRIVATE halide.lib)
+
+# tutorial 1
+set(T2 src/tutorial2_control_camera.cpp)
+add_executable(tutorial2_control_camera ${T2})
+target_compile_features(tutorial2_control_camera PUBLIC cxx_std_17)
+
+target_link_libraries(tutorial2_control_camera PRIVATE opencv_world455.lib)
+target_link_libraries(tutorial2_control_camera PRIVATE ion-core.lib)
+target_link_libraries(tutorial2_control_camera PRIVATE halide.lib)
 
 #
 # Allow big object

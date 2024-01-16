@@ -40,9 +40,9 @@ int video(int width, int height, std::string pixel_format, int num_device){
     // add BB to pipeline
     Node n = b.add(bb_name[pixel_format])()
       .set_param(
-          Param("num_devices", num_device),
-          Param("frame_sync", true),
-          Param("realtime_diaplay_mode", false)
+        Param("num_devices", num_device),
+        Param("frame_sync", true),
+        Param("realtime_diaplay_mode", false)
       );
 
     // portmapping from output port to output buffer
@@ -62,12 +62,12 @@ int video(int width, int height, std::string pixel_format, int num_device){
     {
       // JIT compilation and execution of pipelines with Builder.
       try {
-          b.run();
+        b.run();
       }catch(std::exception& e){
-          // e.what() shows the error message if pipeline build/run was failed.
-          std::cerr << "Failed to build pipeline" << std::endl;
-          std::cerr << e.what() << std::endl;
-          exit(1);
+        // e.what() shows the error message if pipeline build/run was failed.
+        std::cerr << "Failed to build pipeline" << std::endl;
+        std::cerr << e.what() << std::endl;
+        exit(1);
       }
 
       // Convert the retrieved buffer object to OpenCV buffer format.
