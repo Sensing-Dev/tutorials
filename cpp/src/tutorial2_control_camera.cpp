@@ -80,6 +80,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
     n["output"].bind(output);
 
     int loop_num = 100;
+    int coef =  positive_pow(2, num_bit_shift_map[pixel_format]);
     for (int i = 0; i < loop_num; ++i)
     {
       // JIT compilation and execution of pipelines with Builder.
@@ -95,7 +96,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
       // Convert the retrieved buffer object to OpenCV buffer format.
       for (int i = 0; i < num_device; ++i){
         cv::Mat img(height, width, opencv_mat_type[pixel_format], output[i].data());
-        img *= positive_pow(2, num_bit_shift_map[pixel_format]);
+        img *= coef;
         cv::imshow("image" + std::to_string(i), img);
       }
 
