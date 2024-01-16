@@ -12,7 +12,7 @@ if __name__ == "__main__":
     width = 1920
     height = 1080
     pixelformat = "Mono8"
-    num_device = 1
+    num_device = 2
 
     # the following items varies by PixelFormat
     data_type = np.uint8 if pixelformat == "Mono8" or pixelformat == "RGB8" \
@@ -43,16 +43,25 @@ if __name__ == "__main__":
     node = builder.add(bb_name)\
         .set_param([num_devices, frame_sync, realtime_diaplay_mode, ])
     output_p = node.get_port('output')
+    frame_count_p = node.get_port('frame_count')
 
     # create halide buffer for output port
     outputs = []
     output_size = (width, height, )
     if pixelformat == "RGB8":
         output_size += (3,)
-    outputs.append(Buffer(Type(TypeCode.Uint, depth_of_buffer, 1), output_size))
+    for i in range(num_device):
+        outputs.append(Buffer(Type(TypeCode.Uint, depth_of_buffer, 1), output_size))
+
+    fcdata = np.full((1), fill_value=0, dtype=np.uint32)
+    frame_count = []
+    for i in range(num_device):
+        frame_count.append(Buffer(array=fcdata))
 
     # set I/O ports
-    output_p[0].bind(outputs[0])
+    for i in range(num_device):
+        output_p[i].bind(outputs[i])
+        frame_count_p[i].bind(frame_count[i])
 
     # prepare Opencv 
     buf_size_opencv = (height, width)
@@ -67,13 +76,16 @@ if __name__ == "__main__":
     for x in range(loop_num):
         # running the builder
         builder.run()
-        output_bytes = outputs[0].read(output_byte_size) 
 
-        output_np_HxW = np.frombuffer(output_bytes, data_type).reshape(buf_size_opencv)
-        output_np_HxW *= coef
+        for i in range(num_device):
+            output_bytes_image = outputs[i].read(output_byte_size)
+            output_np_HxW_image = np.frombuffer(output_bytes_image, data_type).reshape(buf_size_opencv)
+            output_np_HxW_image *= coef
 
-        cv2.imshow("img", output_np_HxW)
+            cv2.imshow("img" + str(i), output_np_HxW_image)
         cv2.waitKey(1)
+
+        print(fcdata[0])
 
     cv2.destroyAllWindows()
 

@@ -4,10 +4,6 @@ import cv2
 import os
 os.add_dll_directory(os.path.join(os.environ["SENSING_DEV_ROOT"], "bin"))
 
-import gi
-gi.require_version("Aravis", "0.8")
-from gi.repository import Aravis
-
 from ionpy import Node, Builder, Buffer, PortMap, Port, Param, Type, TypeCode
 
 if __name__ == "__main__":
