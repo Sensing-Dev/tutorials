@@ -16,11 +16,6 @@ using namespace ion;
     #define MODULE_NAME "libion-bb.so"
 #endif
 
-
-#define FEATURE_GAIN_KEY "Gain"
-#define FEATURE_EXPOSURE_KEY "ExposureTime"
-
-
 std::map<std::string, int32_t> num_bit_shift_map{
   {"Mono8", 0}, {"Mono10", 6}, {"Mono12", 4}};
 std::map<std::string, int32_t> opencv_mat_type{
@@ -41,7 +36,6 @@ int positive_pow(int base, int expo){
   }
 }
 
-
 template<typename T>
 int video(int width, int height, std::string pixel_format, int num_device){
     // pipeline setup
@@ -49,37 +43,16 @@ int video(int width, int height, std::string pixel_format, int num_device){
     b.set_target(Halide::get_host_target());
     b.with_bb_module(MODULE_NAME);
 
-    // set port
-    Port dispose_p{ "dispose",  Halide::type_of<bool>() };
-    Port gain_p{ "gain", Halide::type_of<double>(), 1 };
-    Port exposure_p{ "exposure", Halide::type_of<double>(), 1 };
-
-    Node n = b.add(bb_name[pixel_format])(dispose_p, gain_p, exposure_p)
+    // add BB to pipeline
+    Node n = b.add(bb_name[pixel_format])()
       .set_param(
         Param{"num_devices", std::to_string(num_device)},
-        Param{"pixel_format_ptr", pixel_format},
         Param{"frame_sync", "true"},
-        Param{"gain_key", FEATURE_GAIN_KEY},
-        Param{"exposure_key", FEATURE_EXPOSURE_KEY},
         Param{"realtime_diaplay_mode", "false"}
       );
 
-    double *gains = (double*) malloc (sizeof (double) * num_device);
-    double *exposures = (double*) malloc (sizeof (double) * num_device);
-    for (int i = 0; i < num_device; ++i){
-        gains[i] = 40.0;
-        exposures[i] = 100.0;
-    }
-
-
-    Halide::Buffer<double> gain_buf(gains, std::vector< int >{num_device});
-    Halide::Buffer<double> exposure_buf(exposures, std::vector< int >{num_device});
-
-
+    // portmapping from output port to output buffer
     PortMap pm;
-    pm.set(gain_p, gain_buf);
-    pm.set(exposure_p, exposure_buf);
-
     std::vector< int > buf_size = std::vector < int >{ width, height };
     if (pixel_format == "RGB8"){
         buf_size.push_back(3);
@@ -90,10 +63,9 @@ int video(int width, int height, std::string pixel_format, int num_device){
     }
     pm.set(n["output"], output);
 
-    int loop_num = 1000;
+    int loop_num = 100;
     for (int i = 0; i < loop_num; ++i)
     {
-      pm.set(dispose_p, i == loop_num-1);
       // JIT compilation and execution of pipelines with Builder.
       try {
           b.run(pm);
@@ -112,8 +84,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
         cv::imshow("image" + std::to_string(i), img);
       }
 
-      // Wait for key input
-      //   When any key is pressed, close the currently displayed image and proceed to the next frame.
+      // Wait for 1ms
       cv::waitKey(1);
     }
     return 0;
@@ -124,7 +95,7 @@ int main(int argc, char *argv[])
   try{
     int32_t width = 640;
     int32_t height = 480;
-    int32_t num_device = 2;
+    int32_t num_device = 1;
     std::string pixelformat = "Mono8";
 
     if (pixelformat == "Mono8"){
