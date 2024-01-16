@@ -65,15 +65,8 @@ int video(int width, int height, std::string pixel_format, int num_device){
     while(user_input == -1)
     {
       // JIT compilation and execution of pipelines with Builder.
-      try {
-        b.run();
-      }catch(std::exception& e){
-        // e.what() shows the error message if pipeline build/run was failed.
-        std::cerr << "Failed to build pipeline" << std::endl;
-        std::cerr << e.what() << std::endl;
-        exit(1);
-      }
-
+      b.run();
+      
       // Convert the retrieved buffer object to OpenCV buffer format.
       for (int i = 0; i < num_device; ++i){
         cv::Mat img(height, width, opencv_mat_type[pixel_format]);
@@ -102,7 +95,7 @@ int main(int argc, char *argv[])
     }else{
       int ret = video<uint16_t>(width, height, pixelformat, num_device);
     }
-    
+
   } catch(std::exception& e){
     std::cerr << e.what() << std::endl;
     return 1;
