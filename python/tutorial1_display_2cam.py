@@ -49,8 +49,8 @@ if __name__ == "__main__":
     output_size = (width, height, )
     if pixelformat == "RGB8":
         output_size += (3,)
-    outputs.append(Buffer(Type(TypeCode.Uint, depth_of_buffer, 1), output_size))
-    outputs.append(Buffer(Type(TypeCode.Uint, depth_of_buffer, 1), output_size))
+    for i in range(num_device):
+        outputs.append(Buffer(Type(TypeCode.Uint, depth_of_buffer, 1), output_size))
 
     # set I/O ports
     for i in range(num_device):
@@ -69,16 +69,14 @@ if __name__ == "__main__":
     for x in range(loop_num):
         # running the builder
         builder.run()
-        output_bytes_image0 = outputs[0].read(output_byte_size)
-        output_bytes_image1 = outputs[1].read(output_byte_size)
 
-        output_np_HxW_image0 = np.frombuffer(output_bytes_image0, data_type).reshape(buf_size_opencv)
-        output_np_HxW_image1 = np.frombuffer(output_bytes_image1, data_type).reshape(buf_size_opencv)
-        output_np_HxW_image0 *= coef
-        output_np_HxW_image1 *= coef
+        for i in range(num_device):
+            output_bytes_image = outputs[i].read(output_byte_size)
+            output_np_HxW_image = np.frombuffer(output_bytes_image, data_type).reshape(buf_size_opencv)
+            output_np_HxW_image *= coef
 
-        cv2.imshow("img0", output_np_HxW_image0)
-        cv2.imshow("img1", output_np_HxW_image1)
+            cv2.imshow("img" + str(i), output_np_HxW_image)
+
         cv2.waitKey(1)
 
     cv2.destroyAllWindows()
