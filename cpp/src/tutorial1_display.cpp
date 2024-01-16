@@ -99,9 +99,12 @@ int main(int argc, char *argv[])
       int ret = video<uint16_t>(width, height, pixelformat, num_device);
     }
 
-  }catch(std::exception& e){
+  } catch(std::exception& e){
     std::cerr << e.what() << std::endl;
-    exit(1);
+    return 1;
+  } catch (const ion::Error& e) {
+    std::cerr << e.what() << std::endl;
+    return 1;
   }
   return 0;
 }
