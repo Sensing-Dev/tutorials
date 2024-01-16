@@ -66,6 +66,7 @@ if __name__ == "__main__":
         output_byte_size *= 3
 
     loop_num = 100
+    coef = pow(2, num_bit_shift)
 
     for x in range(loop_num):
         # running the builder
@@ -73,9 +74,9 @@ if __name__ == "__main__":
         output_bytes = outputs[0].read(output_byte_size) 
 
         output_np_HxW = np.frombuffer(output_bytes, data_type).reshape(buf_size_opencv)
-        output_np_HxW *= pow(2, num_bit_shift)
+        output_np_HxW *= coef
 
-        cv2.imshow("A", output_np_HxW)
+        cv2.imshow("img", output_np_HxW)
         cv2.waitKey(1)
 
     cv2.destroyAllWindows()
