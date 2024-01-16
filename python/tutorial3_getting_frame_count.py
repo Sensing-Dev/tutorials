@@ -70,10 +70,10 @@ if __name__ == "__main__":
         buf_size_opencv += (3,)
         output_byte_size *= 3
 
-    loop_num = 100
     coef = pow(2, num_bit_shift)
+    user_input = -1
 
-    for x in range(loop_num):
+    while(user_input == -1):
         # running the builder
         builder.run()
 
@@ -83,7 +83,7 @@ if __name__ == "__main__":
             output_np_HxW_image *= coef
 
             cv2.imshow("img" + str(i), output_np_HxW_image)
-        cv2.waitKey(1)
+        user_input = cv2.waitKeyEx(1)
 
         print(fcdata[0])
 
