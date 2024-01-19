@@ -30,6 +30,11 @@ int positive_pow(int base, int expo){
   }
 }
 
+double gain0 = 35.0;
+double exposuretime0 = 50.0;
+double gain1 = 47.0;
+double exposuretime1 = 100.0;
+
 template<typename T>
 int video(int width, int height, std::string pixel_format, int num_device){
     // pipeline setup
@@ -38,14 +43,32 @@ int video(int width, int height, std::string pixel_format, int num_device){
     b.with_bb_module("ion-bb");
 
     // add BB to pipeline
-    Node n = b.add(bb_name[pixel_format])()
-      .set_param(
-        Param("num_devices", num_device),
-        Param("frame_sync", true),
-        Param("realtime_diaplay_mode", false)
-      );
-
-    // portmapping from output port to output buffer
+    Node n;
+    if (num_device == 1){
+      n = b.add(bb_name[pixel_format])(&gain0, &exposuretime0)
+        .set_param(
+          Param("num_devices", num_device),
+          Param("frame_sync", true),
+          Param("realtime_diaplay_mode", false),
+          Param("enable_control", true),
+          Param("gain_key", "Gain"),
+          Param("exposure_key", "ExposureTime")
+        );
+    }else if (num_device == 2){
+      n = b.add(bb_name[pixel_format])(&gain0, &exposuretime0, &gain1, &exposuretime1)
+        .set_param(
+          Param("num_devices", num_device),
+          Param("frame_sync", true),
+          Param("realtime_diaplay_mode", false),
+          Param("enable_control", true),
+          Param("gain_key", "Gain"),
+          Param("exposure_key", "ExposureTime")
+        );
+    }else{
+      throw("Set the same number of gains and exposure times as the number of devices.");
+    }
+    
+    // portmapping from output port to buffer
     std::vector< int > buf_size = std::vector < int >{ width, height };
     if (pixel_format == "RGB8"){
         buf_size.push_back(3);
@@ -66,8 +89,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
       
       // Convert the retrieved buffer object to OpenCV buffer format.
       for (int i = 0; i < num_device; ++i){
-        cv::Mat img(height, width, opencv_mat_type[pixel_format]);
-        std::memcpy(img.ptr(), output[i].data(), output[i].size_in_bytes());
+        cv::Mat img(height, width, opencv_mat_type[pixel_format], output[i].data());
         img *= coef;
         cv::imshow("image" + std::to_string(i), img);
       }

@@ -6,17 +6,12 @@ os.add_dll_directory(os.path.join(os.environ["SENSING_DEV_ROOT"], "bin"))
 
 from ionpy import Node, Builder, Buffer, PortMap, Port, Param, Type, TypeCode
 
-if os.name == 'nt':
-    module_name = 'ion-bb.dll'
-elif os.name == 'posix':
-    module_name = 'libion-bb.so'
-
 if __name__ == "__main__":
 
     # device information
-    width = 1280
-    height = 960
-    pixelformat = "RGB8"
+    width = 1920
+    height = 1080
+    pixelformat = "Mono8"
     num_device = 2
 
     # the following items varies by PixelFormat
@@ -37,49 +32,31 @@ if __name__ == "__main__":
     # pipeline setup
     builder = Builder()
     builder.set_target('host')
-    builder.with_bb_module(module_name)
-
-    # set port
-    dispose_p = Port('dispose', Type(TypeCode.Uint, 1, 1), 0)
-    gain_p = Port('gain', Type(TypeCode.Float, 64, 1), 1)
-    exposuretime_p = Port('exposuretime', Type(TypeCode.Float, 64, 1), 1)
+    builder.with_bb_module('ion-bb')
 
     # set params
     num_devices = Param('num_devices', str(num_device))
-    pixel_format_ptr = Param('pixel_format_ptr', pixelformat)
     frame_sync = Param('frame_sync', 'false')
-    gain_key = Param('gain_key', 'Gain')
-    exposure_key = Param('exposure_key', 'ExposureTime')
     realtime_diaplay_mode = Param('realtime_diaplay_mode', 'true')
 
     # add a node to pipeline
     node = builder.add(bb_name)\
-        .set_port([dispose_p, gain_p, exposuretime_p, ])\
-        .set_param([num_devices, pixel_format_ptr, frame_sync, gain_key, exposure_key, realtime_diaplay_mode, ])
+        .set_param([num_devices, frame_sync, realtime_diaplay_mode, ])
     output_p = node.get_port('output')
-
-    # create halide buffer for input port
-    gain_data = np.array([48.0, 24.0])
-    exposure_data = np.array([100.0, 50.0])
-
-    gains = Buffer(Type(TypeCode.Float, 64, 1), (2,))
-    exposures = Buffer(Type(TypeCode.Float, 64, 1), (2,))
-    gains.write(gain_data.tobytes(order='C'))
-    exposures.write(exposure_data.tobytes(order='C'))
 
     # create halide buffer for output port
     outputs = []
-    output_size = (width, height, )
+    output_datas = []
+    output_size = (height, width, )
     if pixelformat == "RGB8":
         output_size += (3,)
-    outputs.append(Buffer(Type(TypeCode.Uint, depth_of_buffer, 1), output_size))
-    outputs.append(Buffer(Type(TypeCode.Uint, depth_of_buffer, 1), output_size))
+    for i in range(num_device):
+        output_datas.append(np.full(output_size, fill_value=0, dtype=data_type))
+        outputs.append(Buffer(array= output_datas[i]))
 
     # set I/O ports
-    port_map = PortMap()
-    port_map.set_buffer(gain_p, gains)
-    port_map.set_buffer(exposuretime_p, exposures)
-    port_map.set_buffer_array(output_p, outputs)
+    for i in range(num_device):
+        output_p[i].bind(outputs[i])
 
     # prepare Opencv 
     buf_size_opencv = (height, width)
@@ -88,24 +65,18 @@ if __name__ == "__main__":
         buf_size_opencv += (3,)
         output_byte_size *= 3
 
-    loop_num = 100
+    coef = pow(2, num_bit_shift)
+    user_input = -1
 
-    for x in range(loop_num):
-        port_map.set_u1(dispose_p, x==loop_num-1)
-
+    while(user_input == -1):
         # running the builder
-        builder.run(port_map)
-        output_bytes_image0 = outputs[0].read(output_byte_size)
-        output_bytes_image1 = outputs[1].read(output_byte_size)
+        builder.run()
 
-        output_np_HxW_image0 = np.frombuffer(output_bytes_image0, data_type).reshape(buf_size_opencv)
-        output_np_HxW_image1 = np.frombuffer(output_bytes_image1, data_type).reshape(buf_size_opencv)
-        output_np_HxW_image0 *= pow(2, num_bit_shift)
-        output_np_HxW_image1 *= pow(2, num_bit_shift)
+        for i in range(num_device):
+            output_datas[i] *= coef
 
-        cv2.imshow("A", output_np_HxW_image0)
-        cv2.imshow("B", output_np_HxW_image1)
-        cv2.waitKey(1)
+            cv2.imshow("img" + str(i), output_datas[i])
+        user_input = cv2.waitKeyEx(1)
 
     cv2.destroyAllWindows()
 

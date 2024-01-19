@@ -24,19 +24,19 @@ int main(int argc, char *argv[])
         if (error){
             throw std::runtime_error(error->message);
         }
-        printf("%20s : %li\n",
+        printf("%20s : %" G_GUINT64_FORMAT "\n",
             "Width",
             arv_device_get_integer_feature_value(device, "Width", &error));
                 if (error){
             throw std::runtime_error(error->message);
         }
-        printf("%20s : %li\n",
+        printf("%20s : %" G_GUINT64_FORMAT "\n",
             "Height",
             arv_device_get_integer_feature_value(device, "Height", &error));
                 if (error){
             throw std::runtime_error(error->message);
         }
-        printf("%20s : %li\n",
+        printf("%20s : %" G_GUINT64_FORMAT "\n",
             "PayloadSize",
             arv_device_get_integer_feature_value(device, "PayloadSize", &error));
                 if (error){

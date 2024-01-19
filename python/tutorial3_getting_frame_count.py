@@ -12,7 +12,7 @@ if __name__ == "__main__":
     width = 1920
     height = 1080
     pixelformat = "Mono8"
-    num_device = 1
+    num_device = 2
 
     # the following items varies by PixelFormat
     data_type = np.uint8 if pixelformat == "Mono8" or pixelformat == "RGB8" \
@@ -43,16 +43,27 @@ if __name__ == "__main__":
     node = builder.add(bb_name)\
         .set_param([num_devices, frame_sync, realtime_diaplay_mode, ])
     output_p = node.get_port('output')
+    frame_count_p = node.get_port('frame_count')
 
     # create halide buffer for output port
+    outputs = []
+    output_datas = []
     output_size = (height, width, )
     if pixelformat == "RGB8":
         output_size += (3,)
-    output_data = np.full(output_size, fill_value=0, dtype=data_type)
-    output = Buffer(array= output_data)
+    for i in range(num_device):
+        output_datas.append(np.full(output_size, fill_value=0, dtype=data_type))
+        outputs.append(Buffer(array= output_datas[i]))
+
+    fcdata = np.full((1), fill_value=0, dtype=np.uint32)
+    frame_count = []
+    for i in range(num_device):
+        frame_count.append(Buffer(array=fcdata))
 
     # set I/O ports
-    output_p[0].bind(output)
+    for i in range(num_device):
+        output_p[i].bind(outputs[i])
+        frame_count_p[i].bind(frame_count[i])
 
     # prepare Opencv 
     buf_size_opencv = (height, width)
@@ -67,10 +78,14 @@ if __name__ == "__main__":
     while(user_input == -1):
         # running the builder
         builder.run()
-        output_data *= coef
+        
+        for i in range(num_device):
+            output_datas[i] *= coef
 
-        cv2.imshow("img", output_data)
+            cv2.imshow("img" + str(i), output_datas[i])
         user_input = cv2.waitKeyEx(1)
+
+        print(fcdata[0])
 
     cv2.destroyAllWindows()
 

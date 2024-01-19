@@ -34,25 +34,51 @@ if __name__ == "__main__":
     builder.set_target('host')
     builder.with_bb_module('ion-bb')
 
+    gain_ps = []
+    exposure_ps = []
+    for i in range(num_device):
+        gain_ps.append(Port('gain' + str(i), Type(TypeCode.Float, 64, 1), 0))
+        exposure_ps.append(Port('exposure' + str(i), Type(TypeCode.Float, 64, 1), 0))
+
     # set params
     num_devices = Param('num_devices', str(num_device))
     frame_sync = Param('frame_sync', 'false')
     realtime_diaplay_mode = Param('realtime_diaplay_mode', 'true')
+    enable_control = Param('enable_control', 'true')
+    gain_key = Param('gain_key', 'Gain')
+    exposure_key = Param('exposure_key', 'ExposureTime')
+
+    gain_values = []
+    exposure_values = []
+
+    for i in range(num_device):
+        gain_values.append(40.0)
+        exposure_values.append(100.0)
 
     # add a node to pipeline
     node = builder.add(bb_name)\
-        .set_param([num_devices, frame_sync, realtime_diaplay_mode, ])
+        .set_iport([gain_ps[0], exposure_ps[0]])\
+        .set_param([num_devices, frame_sync, realtime_diaplay_mode, enable_control, gain_key, exposure_key]) if num_device == 1 \
+        else builder.add(bb_name)\
+            .set_iport([gain_ps[0], exposure_ps[0], gain_ps[1], exposure_ps[1]])\
+            .set_param([num_devices, frame_sync, realtime_diaplay_mode, enable_control, gain_key, exposure_key])
     output_p = node.get_port('output')
 
     # create halide buffer for output port
+    outputs = []
+    output_datas = []
     output_size = (height, width, )
     if pixelformat == "RGB8":
         output_size += (3,)
-    output_data = np.full(output_size, fill_value=0, dtype=data_type)
-    output = Buffer(array= output_data)
+    for i in range(num_device):
+        output_datas.append(np.full(output_size, fill_value=0, dtype=data_type))
+        outputs.append(Buffer(array= output_datas[i]))
 
     # set I/O ports
-    output_p[0].bind(output)
+    for i in range(num_device):
+        gain_ps[i].bind(gain_values[i])
+        exposure_ps[i].bind(exposure_values[i])
+        output_p[i].bind(outputs[i])
 
     # prepare Opencv 
     buf_size_opencv = (height, width)
@@ -67,9 +93,11 @@ if __name__ == "__main__":
     while(user_input == -1):
         # running the builder
         builder.run()
-        output_data *= coef
+        
+        for i in range(num_device):
+            output_datas[i] *= coef
 
-        cv2.imshow("img", output_data)
+            cv2.imshow("img" + str(i), output_datas[i])
         user_input = cv2.waitKeyEx(1)
 
     cv2.destroyAllWindows()
