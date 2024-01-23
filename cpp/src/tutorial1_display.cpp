@@ -89,13 +89,14 @@ int video(int width, int height, std::string pixel_format, int num_device){
       output.push_back(Halide::Buffer<T>(buf_size));
     }
     pm.set(n["output"], output);
-
-    int loop_num = 1000;
-    for (int i = 0; i < loop_num; ++i)
+    pm.set(dispose_p, false);
+    int user_input = -1;
+    while(true)
     {
-      pm.set(dispose_p, i == loop_num-1);
+     
       // JIT compilation and execution of pipelines with Builder.
       try {
+          pm.set(dispose_p, user_input != -1);
           b.run(pm);
       }catch(std::exception& e){
           // e.what() shows the error message if pipeline build/run was failed.
@@ -103,7 +104,9 @@ int video(int width, int height, std::string pixel_format, int num_device){
           std::cerr << e.what() << std::endl;
           exit(1);
       }
-
+      if (user_input!=-1){
+         break;
+      }
       // Convert the retrieved buffer object to OpenCV buffer format.
       for (int i = 0; i < num_device; ++i){
         cv::Mat img(height, width, opencv_mat_type[pixel_format]);
@@ -111,19 +114,22 @@ int video(int width, int height, std::string pixel_format, int num_device){
         img *= positive_pow(2, num_bit_shift_map[pixel_format]);
         cv::imshow("image" + std::to_string(i), img);
       }
-
+   
       // Wait for key input
       //   When any key is pressed, close the currently displayed image and proceed to the next frame.
-      cv::waitKey(1);
+      user_input = cv::waitKeyEx(1);
+     
     }
+
     return 0;
 }
 
 int main(int argc, char *argv[])
 {
   try{
-    int32_t width = 640;
-    int32_t height = 480;
+     // replace following values using real camera info
+    int32_t width = 1920;
+    int32_t height = 1080;
     int32_t num_device = 2;
     std::string pixelformat = "Mono8";
 

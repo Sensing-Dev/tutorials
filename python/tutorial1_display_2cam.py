@@ -14,9 +14,9 @@ elif os.name == 'posix':
 if __name__ == "__main__":
 
     # device information
-    width = 1280
-    height = 960
-    pixelformat = "RGB8"
+    width =  1920
+    height = 1080
+    pixelformat = "Mono8"
     num_device = 2
 
     # the following items varies by PixelFormat
@@ -90,11 +90,16 @@ if __name__ == "__main__":
 
     loop_num = 100
 
-    for x in range(loop_num):
-        port_map.set_u1(dispose_p, x==loop_num-1)
+    user_input = -1
+    while(True):
+        port_map.set_u1(dispose_p, user_input!=-1)
 
         # running the builder
         builder.run(port_map)
+        
+        if user_input!=-1:
+            break
+        
         output_bytes_image0 = outputs[0].read(output_byte_size)
         output_bytes_image1 = outputs[1].read(output_byte_size)
 
@@ -105,7 +110,7 @@ if __name__ == "__main__":
 
         cv2.imshow("A", output_np_HxW_image0)
         cv2.imshow("B", output_np_HxW_image1)
-        cv2.waitKey(0)
+        user_input = cv2.waitKeyEx(1)
 
     cv2.destroyAllWindows()
 
