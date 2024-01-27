@@ -32,7 +32,7 @@ if __name__ == "__main__":
     # pipeline setup
     builder = Builder()
     builder.set_target('host')
-    builder.with_bb_module('ion-bb')
+    # builder.with_bb_module('ion-bb')
 
     gain_ps = []
     exposure_ps = []
