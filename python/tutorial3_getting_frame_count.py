@@ -55,15 +55,13 @@ if __name__ == "__main__":
         output_datas.append(np.full(output_size, fill_value=0, dtype=data_type))
         outputs.append(Buffer(array= output_datas[i]))
 
-    fcdata = np.full((1), fill_value=0, dtype=np.uint32)
-    frame_count = []
-    for i in range(num_device):
-        frame_count.append(Buffer(array=fcdata))
+    fcdata = np.full((num_device), fill_value=0, dtype=np.uint32)
+    frame_count = Buffer(array=fcdata)
 
     # set I/O ports
     for i in range(num_device):
         output_p[i].bind(outputs[i])
-        frame_count_p[i].bind(frame_count[i])
+    frame_count_p.bind(frame_count)
 
     # prepare Opencv 
     buf_size_opencv = (height, width)
@@ -83,9 +81,11 @@ if __name__ == "__main__":
             output_datas[i] *= coef
 
             cv2.imshow("img" + str(i), output_datas[i])
+            
+            print(fcdata[0], end=" ")
+        print("") 
         user_input = cv2.waitKeyEx(1)
-
-        print(fcdata[0])
+        
 
     cv2.destroyAllWindows()
 
