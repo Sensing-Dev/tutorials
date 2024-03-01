@@ -51,12 +51,12 @@ int video(int width, int height, std::string pixel_format, int num_device){
         buf_size.push_back(3);
     }
     std::vector<Halide::Buffer<T>> output;
-    std::vector<Halide::Buffer<uint32_t>> frame_counts;
     for (int i = 0; i < num_device; ++i){
       output.push_back(Halide::Buffer<T>(buf_size));
-      frame_counts.push_back(Halide::Buffer<uint32_t>(1));
     }
     n["output"].bind(output);
+
+    Halide::Buffer<uint32_t> frame_counts = Halide::Buffer<uint32_t>(num_device);
     n["frame_count"].bind(frame_counts);
 
     int coef =  positive_pow(2, num_bit_shift_map[pixel_format]);
@@ -73,11 +73,12 @@ int video(int width, int height, std::string pixel_format, int num_device){
         std::memcpy(img.ptr(), output[i].data(), output[i].size_in_bytes());
         img *= coef;
         cv::imshow("image" + std::to_string(i), img);
+        std::cout << frame_counts(i) << " ";
       }
+      std::cout << std::endl;
 
       // Wait for 1ms
       user_input = cv::waitKeyEx(1);
-      std::cout << frame_counts[0](0) << std::endl;
     }
     return 0;
 }
