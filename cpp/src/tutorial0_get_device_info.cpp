@@ -1,3 +1,15 @@
+/*
+
+g++ src/tutorial0_get_device_info.cpp -o tutorial0_get_device_info  \
+-I /opt/sensing-dev/include -I /opt/sensing-dev/include/aravis-0.8 \
+-L /opt/sensing-dev/lib \
+-L /opt/sensing-dev/lib/x86_64-linux-gnu \
+-ldl -lpthread \
+-laravis-0.8 -lgobject-2.0 \
+`pkg-config --cflags --libs glib-2.0`
+
+*/
+
 #include <exception>
 #include <iostream>
 #include "arv.h"
