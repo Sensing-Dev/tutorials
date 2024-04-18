@@ -1,3 +1,17 @@
+/*
+
+g++ src/tutorial2_control_camera.cpp -o tutorial2_control_camera  \
+-I /opt/sensing-dev/include -I /opt/sensing-dev/include/aravis-0.8 \
+-I /opt/sensing-dev/include/opencv4 \
+-L /opt/sensing-dev/lib \
+-L /opt/sensing-dev/lib/x86_64-linux-gnu \
+-lHalide -lion-core -ldl -lpthread -lopencv_core \
+-lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc \
+-laravis-0.8 -lgobject-2.0 \
+`pkg-config --cflags --libs glib-2.0`
+
+*/
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
