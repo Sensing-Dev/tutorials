@@ -16,7 +16,7 @@ if __name__ == "__main__":
     pixelformat = "Mono8"
     payloadsize = 2074880
 
-    num_device = 2
+    num_device = 1
 
     # where to save gendc
     save_data_directory = 'tutorial_save_gendc_' + datetime.datetime.now().strftime('%Y%m%d%H%M%S')
@@ -57,6 +57,8 @@ if __name__ == "__main__":
     payloadsize_p.bind(payloadsize)
 
     num_run = 0
+
+    print("Hi any key to stop saving")
     
     try:
         while True:
