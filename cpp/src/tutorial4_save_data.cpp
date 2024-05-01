@@ -1,6 +1,6 @@
 /*
 
-g++ src/tutorial4_save_gendc.cpp -o tutorial4_save_gendc  \
+g++ src/tutorial4_save_data.cpp -o tutorial4_save_data  \
 -I /opt/sensing-dev/include \
 -L /opt/sensing-dev/lib \
 -L /opt/sensing-dev/lib/x86_64-linux-gnu \
