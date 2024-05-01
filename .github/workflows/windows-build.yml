@@ -1,0 +1,60 @@
+name: GCC Compile Test
+
+on:
+  pull_request:
+    branches:
+      - '*'  # This will run the build and test jobs for pull requests to all branches
+
+jobs:
+  test-cpp:
+    runs-on: windows-latest
+    env: 
+      SDK_VERSION: v24.04.00-test4
+    strategy:
+        matrix:
+          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count]
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+        with:
+          submodules: recursive
+
+      - name: Install sensing-dev SDK
+        run: |
+          mkdir setup_dir && cd setup_dir
+          Invoke-WebRequest -Uri https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${{ env.SDK_VERSION }}/installer.ps1 -OutFile installer.ps1 -Verbose
+          powershell.exe -ExecutionPolicy Bypass -File ./installer.ps1 -user $env:USERNAME -version ${{ env.SDK_VERSION }} -InstallOpenCV
+          echo 'SENSING_DEV_ROOT=$env:SENSING_DEV_ROOT' >> $GITHUB_ENV
+
+      - name: Check file existence
+        id: check_file
+        run: |
+          $filePath = "${env:LOCALAPPDATA}\sensing-dev\opencv"
+          if (Test-Path $filePath) {
+            Write-Output "File exists: $filePath"
+            Write-Output "::set-output name=file_exists::true"
+          } else {
+            Write-Output "File does not exist: $filePath"
+            Write-Output "::set-output name=file_exists::false"
+            exit 1
+          }
+
+      - name: Build ${{ matrix.tutorial_file_name}}
+        run: |
+          $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
+          Write-Host PATH = $PATH
+          $env:PATH="$env:PATH;$PATH"
+
+          $GST_PLUGIN_PATH =  [Environment]::GetEnvironmentVariable("GST_PLUGIN_PATH", "User")
+          Write-Host GST_PLUGIN_PATH = $GST_PLUGIN_PATH
+          $env:GST_PLUGIN_PATH=${GST_PLUGIN_PATH} 
+
+          $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
+          Write-Host SENSING_DEV_ROOT = $SENSING_DEV_ROOT
+          $env:SENSING_DEV_ROOT=${SENSING_DEV_ROOT}
+
+          cd cpp
+          mkdir build && cd build
+          cmake ../ -DBUILD_TUTORIAL=${{ matrix.tutorial_file_name}}
+          cmake --build . --config Release
