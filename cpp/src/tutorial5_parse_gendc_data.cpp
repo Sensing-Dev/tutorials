@@ -25,8 +25,8 @@ int extractNumber(const std::string& filename) {
 
 int main(int argc, char* argv[]){
 
-    std::string directory_name = "tutorial_save_gendc_20240506072657";
-    int num_device = 2; // you may also get this number from config.json
+    std::string directory_name = "tutorial_save_gendc_XXXXXXXXXXXXXX";
+    int num_device = 1; // you may also get this number from config.json
     std::string prefix = "sensor0-";
     
     if (!std::filesystem::exists(directory_name)) {
