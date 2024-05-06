@@ -4,7 +4,7 @@ g++ src/tutorial4_save_data.cpp -o tutorial4_save_data  \
 -I /opt/sensing-dev/include \
 -L /opt/sensing-dev/lib \
 -L /opt/sensing-dev/lib/x86_64-linux-gnu \
--lHalide -lion-core -ldl -lpthread 
+-lHalide -lion-core -ldl -lpthread
 
 */
 #include <filesystem>
@@ -14,8 +14,6 @@ g++ src/tutorial4_save_data.cpp -o tutorial4_save_data  \
 #include <sstream>
 
 #include <ion/ion.h>
-#include "gendc_separator/ContainerHeader.h"
-#include "gendc_separator/tools.h"
 
 #ifdef _WIN32
     #include <conio.h>
@@ -43,9 +41,6 @@ g++ src/tutorial4_save_data.cpp -o tutorial4_save_data  \
 
 using namespace ion;
 
-
-
-
 int build_and_process_pipeline(int width, int height, std::string pixel_format, int payloadsize, int num_device, std::string saving_diretctory){
     // pipeline setup
     Builder b;
@@ -60,12 +55,21 @@ int build_and_process_pipeline(int width, int height, std::string pixel_format, 
         Param("realtime_diaplay_mode", false)
       );
 
-    n = b.add("image_io_binary_gendc_saver")(n["gendc"], n["device_info"], &payloadsize)
+    if (num_device == 2){
+        int32_t payloadsize1 = payloadsize;
+        Node n1 = b.add("image_io_binary_gendc_saver")(n["gendc"][1], n["device_info"][1], &payloadsize)
         .set_param(
-            Param("num_devices", num_device),
-            Param("output_directory", saving_diretctory),
-            Param("input_gendc.size", num_device),
-            Param("input_deviceinfo.size", num_device)
+            Param("prefix", "sensor1-"),
+            Param("output_directory", saving_diretctory)
+        );
+        Halide::Buffer<int> output1 = Halide::Buffer<int>::make_scalar();
+        n1["output"].bind(output1);
+    }
+
+    n = b.add("image_io_binary_gendc_saver")(n["gendc"][0], n["device_info"][0], &payloadsize)
+        .set_param(
+            Param("prefix", "sensor0-"),
+            Param("output_directory", saving_diretctory)
         );
 
     // create halide buffer for output port
