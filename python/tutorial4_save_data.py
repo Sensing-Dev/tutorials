@@ -53,19 +53,19 @@ if __name__ == "__main__":
     # bind input values to the input port
     payloadsize_p.bind(payloadsize)
 
-    # if num_devices == 2:
-    #     payloadsize1_p = Port('payloadsize1', Type(TypeCode.Int, 32, 1), 0)
-    #     node_sensor1 = builder.add("image_io_binary_gendc_saver")\
-    #         .set_iport([node.get_port('gendc')[1], node.get_port('device_info')[1], payloadsize1_p, ])\
-    #         .set_param([output_directory, 
-    #                     Param('prefix', 'sensor1-') ])
-    #     terminator1 = node_sensor1.get_port('output')
-    #     output1 = Buffer(Type(TypeCode.Int, 32, 1), ())
-    #     terminator1.bind(output1)
-    #     payloadsize1_p.bind(payloadsize)
+    if num_devices == 2:
+        payloadsize1_p = Port('payloadsize1', Type(TypeCode.Int, 32, 1), 0)
+        node_sensor1 = builder.add("image_io_binary_gendc_saver")\
+            .set_iport([node.get_port('gendc')[1], node.get_port('device_info')[1], payloadsize1_p, ])\
+            .set_param([output_directory, 
+                        Param('prefix', 'sensor1-') ])
+        terminator1 = node_sensor1.get_port('output')
+        output1 = Buffer(Type(TypeCode.Int, 32, 1), ())
+        terminator1.bind(output1)
+        payloadsize1_p.bind(payloadsize)
 
     num_run = 0
-    print("Press any key to stop saving")
+    print("Press ctrl-C to stop saving")
     try:
         while True:
             builder.run()
