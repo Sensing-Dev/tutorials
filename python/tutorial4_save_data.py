@@ -35,31 +35,37 @@ if __name__ == "__main__":
     frame_sync = Param('frame_sync', 'false')
     realtime_diaplay_mode = Param('realtime_diaplay_mode', 'true')
     output_directory = Param('output_directory', save_data_directory)
-    # gain_key = Param('gain_key', 'Gain')
-    # exposure_key = Param('exposure_key', 'ExposureTime')
 
     # add a node to pipeline
     node = builder.add("image_io_u3v_gendc")\
         .set_param([num_devices, frame_sync, realtime_diaplay_mode, ])
 
-    node = builder.add("image_io_binary_gendc_saver")\
-        .set_iport([node.get_port('gendc'), node.get_port('device_info'), payloadsize_p, ])\
-        .set_param([num_devices, output_directory, 
-                    Param('input_gendc.size', str(num_device)), 
-                    Param('input_deviceinfo.size', str(num_device)) ])
+    node_sensor0 = builder.add("image_io_binary_gendc_saver")\
+        .set_iport([node.get_port('gendc')[0], node.get_port('device_info')[0], payloadsize_p, ])\
+        .set_param([output_directory, 
+                    Param('prefix', 'sensor0-') ])
 
     # create halide buffer for output port
-    terminator = node.get_port('output')
-    output = Buffer(Type(TypeCode.Int, 32, 1), ())
-    terminator.bind(output)
+    terminator0 = node_sensor0.get_port('output')
+    output0 = Buffer(Type(TypeCode.Int, 32, 1), ())
+    terminator0.bind(output0)
 
     # bind input values to the input port
     payloadsize_p.bind(payloadsize)
 
-    num_run = 0
+    # if num_devices == 2:
+    #     payloadsize1_p = Port('payloadsize1', Type(TypeCode.Int, 32, 1), 0)
+    #     node_sensor1 = builder.add("image_io_binary_gendc_saver")\
+    #         .set_iport([node.get_port('gendc')[1], node.get_port('device_info')[1], payloadsize1_p, ])\
+    #         .set_param([output_directory, 
+    #                     Param('prefix', 'sensor1-') ])
+    #     terminator1 = node_sensor1.get_port('output')
+    #     output1 = Buffer(Type(TypeCode.Int, 32, 1), ())
+    #     terminator1.bind(output1)
+    #     payloadsize1_p.bind(payloadsize)
 
-    print("Hi any key to stop saving")
-    
+    num_run = 0
+    print("Press any key to stop saving")
     try:
         while True:
             builder.run()
