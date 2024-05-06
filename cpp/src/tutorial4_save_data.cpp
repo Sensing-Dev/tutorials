@@ -41,7 +41,7 @@ g++ src/tutorial4_save_data.cpp -o tutorial4_save_data  \
 
 using namespace ion;
 
-int build_and_process_pipeline(int width, int height, std::string pixel_format, int payloadsize, int num_device, std::string saving_diretctory){
+int build_and_process_pipeline(int width, int height, int payloadsize, int num_device, std::string saving_diretctory){
     // pipeline setup
     Builder b;
     b.set_target(ion::get_host_target());
@@ -118,12 +118,11 @@ int main(int argc, char* argv[]){
         // `arv-tool-0.8 -n "<name of device>" control PixelFormat Width Height PayloadSize`
         int32_t width = 1920;
         int32_t height = 1080;
-        std::string pixelformat = "Mono8";
         int32_t payloadsize = 2074880;
 
         int32_t num_device = 2;
 
-        int ret = build_and_process_pipeline(width, height, pixelformat, payloadsize, num_device, ss.str());
+        int ret = build_and_process_pipeline(width, height, payloadsize, num_device, ss.str());
 
     } catch(std::exception& e){
         std::cerr << e.what() << std::endl;
