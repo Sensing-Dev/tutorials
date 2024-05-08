@@ -1,4 +1,4 @@
-name: Linux Build Test
+name: GCC Build Test
 
 on:
   pull_request:
