@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 
 import os
+
 if os.name == 'nt':
     os.add_dll_directory(os.path.join(os.environ["SENSING_DEV_ROOT"], "bin"))
 
@@ -9,7 +10,7 @@ from ionpy import Node, Builder, Buffer, PortMap, Port, Param, Type, TypeCode
 
 if __name__ == "__main__":
 
-    # device information
+    # device information () change accordingly
     width = 1920
     height = 1080
     pixelformat = "Mono8"
@@ -29,7 +30,7 @@ if __name__ == "__main__":
         else "image_io_u3v_cameraN_u16x2" if pixelformat == "Mono10" or pixelformat == "Mono12" \
         else "image_io_u3v_cameraN_u8x3" if pixelformat == "RGB8" \
         else "image_io_u3v_cameraN_u8x2"
-    
+
     # pipeline setup
     builder = Builder()
     builder.set_target('host')
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     realtime_diaplay_mode = Param('realtime_diaplay_mode', True)
 
     # add a node to pipeline
-    node = builder.add(bb_name)\
+    node = builder.add(bb_name) \
         .set_param([num_devices, frame_sync, realtime_diaplay_mode, ])
     output_p = node.get_port('output')
     frame_count_p = node.get_port('frame_count')
@@ -49,24 +50,27 @@ if __name__ == "__main__":
     # create halide buffer for output port
     outputs = []
     output_datas = []
-    output_size = (height, width, )
+    output_size = (height, width,)
     if pixelformat == "RGB8":
         output_size += (3,)
     for i in range(num_device):
         output_datas.append(np.full(output_size, fill_value=0, dtype=data_type))
-        outputs.append(Buffer(array= output_datas[i]))
+        outputs.append(Buffer(array=output_datas[i]))
 
-    fcdata = np.full((num_device), fill_value=0, dtype=np.uint32)
-    frame_count = Buffer(array=fcdata)
+    fcdatas = []
+    frame_counts = []
+    for i in range(num_device):
+        fcdatas.append(np.zeros(1, dtype=np.uint32))
+        frame_counts.append(Buffer(array=fcdatas[i]))
 
     # set I/O ports
-
     output_p.bind(outputs)
     frame_count_p.bind(frame_count)
 
-    # prepare Opencv 
+
+    # prepare Opencv
     buf_size_opencv = (height, width)
-    output_byte_size = width*height*depth_in_byte
+    output_byte_size = width * height * depth_in_byte
     if pixelformat == "RGB8":
         buf_size_opencv += (3,)
         output_byte_size *= 3
@@ -74,21 +78,15 @@ if __name__ == "__main__":
     coef = pow(2, num_bit_shift)
     user_input = -1
 
-    while(user_input == -1):
+    while (user_input == -1):
         # running the builder
         builder.run()
-        
+
         for i in range(num_device):
             output_datas[i] *= coef
-
             cv2.imshow("img" + str(i), output_datas[i])
-            
-            print(fcdata[0], end=" ")
-        print("") 
+            print(fcdatas[i][0], end=" ")
+        print("")
         user_input = cv2.waitKeyEx(1)
-        
 
     cv2.destroyAllWindows()
-
-
-

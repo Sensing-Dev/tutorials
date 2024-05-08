@@ -70,8 +70,11 @@ int video(int width, int height, std::string pixel_format, int num_device){
     }
     n["output"].bind(output);
 
-    Halide::Buffer<uint32_t> frame_counts = Halide::Buffer<uint32_t>(num_device);
-    n["frame_count"].bind(frame_counts);
+    std::vector<Halide::Buffer<uint32_t>> fc;
+    for (int i = 0; i < num_device; ++i){
+      fc.push_back(Halide::Buffer<uint32_t>(1));
+    }
+    n["frame_count"].bind(fc);
 
     int coef =  positive_pow(2, num_bit_shift_map[pixel_format]);
     int user_input = -1;
@@ -87,7 +90,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
         std::memcpy(img.ptr(), output[i].data(), output[i].size_in_bytes());
         img *= coef;
         cv::imshow("image" + std::to_string(i), img);
-        std::cout << frame_counts(i) << " ";
+        std::cout << fc[i](0) << " ";
       }
       std::cout << std::endl;
 
@@ -102,7 +105,7 @@ int main(int argc, char *argv[])
   try{
     int32_t width = 1920;
     int32_t height = 1080;
-    int32_t num_device = 1;
+    int32_t num_device = 2;
     std::string pixelformat = "Mono8";
 
     if (pixelformat == "Mono8"){
