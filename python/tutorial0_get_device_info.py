@@ -24,9 +24,6 @@ if __name__ == "__main__":
         height = device.get_integer_feature_value("Height")
         payloadsize = device.get_integer_feature_value("PayloadSize")
         pixelformat = device.get_string_feature_value("PixelFormat")
-        # For kizashi1.2 users 
-        # operationmode = device.get_string_feature_value("OperationMode")
-        # framepreset = device.get_string_feature_value("FramePreset")
 
         # Release the device and close the device
         del device
@@ -38,9 +35,6 @@ if __name__ == "__main__":
         print("{0:20s} : {1}".format("Height", height))
         print("{0:20s} : {1}".format("PayloadSize", payloadsize))
         print("{0:20s} : {1}".format("PixelFormat", pixelformat))
-        # For kizashi1.2 users
-        # print("{0:20s} : {1}".format("OperationMode", operationmode))
-        # print("{0:20s} : {1}".format("FramePreset", framepreset))
 
     Aravis.shutdown()
 
