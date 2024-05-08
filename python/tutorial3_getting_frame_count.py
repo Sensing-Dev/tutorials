@@ -37,9 +37,9 @@ if __name__ == "__main__":
     builder.with_bb_module('ion-bb')
 
     # set params
-    num_devices = Param('num_devices', str(num_device))
-    frame_sync = Param('frame_sync', 'false')
-    realtime_diaplay_mode = Param('realtime_diaplay_mode', 'true')
+    num_devices = Param('num_devices', num_device)
+    frame_sync = Param('frame_sync', False)
+    realtime_diaplay_mode = Param('realtime_diaplay_mode', True)
 
     # add a node to pipeline
     node = builder.add(bb_name) \
@@ -65,7 +65,8 @@ if __name__ == "__main__":
 
     # set I/O ports
     output_p.bind(outputs)
-    frame_count_p.bind(frame_counts)
+    frame_count_p.bind(frame_count)
+
 
     # prepare Opencv
     buf_size_opencv = (height, width)
