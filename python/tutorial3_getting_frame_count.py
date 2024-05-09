@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
             cv2.imshow("img" + str(i), output_datas[i])
             
-            print(fcdata[0], end=" ")
+            print(fcdata[i], end=" ")
         print("") 
         user_input = cv2.waitKeyEx(1)
         
