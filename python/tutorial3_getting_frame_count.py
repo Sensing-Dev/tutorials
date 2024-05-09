@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     # set I/O ports
     output_p.bind(outputs)
-    frame_count_p.bind(frame_count)
+    frame_count_p.bind(frame_counts)
 
 
     # prepare Opencv
