@@ -1,6 +1,9 @@
 import re
 import os
 
+import numpy as np
+import cv2
+
 from  gendc_python.gendc_separator import descriptor as gendc
 
 GDC_INTENSITY   = 0x0000000000000001
@@ -39,6 +42,7 @@ if __name__ == "__main__":
                     # get first available component
                     image_component = gendc_descriptor.get_first_get_datatype_of(GDC_INTENSITY)
                     print("First available image data component is Comp", image_component)
+                    print("\tData dimension: ", gendc_descriptor.get("PartCount", image_component))
                     print("\tData size:", gendc_descriptor.get("DataSize", image_component, 0))
                     print("\tData offset:", gendc_descriptor.get("DataOffset", image_component, 0))
 

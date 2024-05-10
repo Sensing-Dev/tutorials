@@ -1,7 +1,9 @@
 /*
 
 g++ src/tutorial5_parse_gendc_data.cpp -o tutorial5_parse_gendc_data  \
--I /opt/sensing-dev/include
+-I /opt/sensing-dev/include/opencv4 \
+-I /opt/sensing-dev/include \
+-lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc
 
 */
 
@@ -9,6 +11,10 @@ g++ src/tutorial5_parse_gendc_data.cpp -o tutorial5_parse_gendc_data  \
 #include <filesystem>
 #include <iostream>
 #include <exception>
+
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 
 #include <regex>
 
@@ -69,6 +75,7 @@ int main(int argc, char* argv[]){
 
         // Check if the binary file has GenDC signature
         if (isGenDC(filecontent)){
+            std::cout << " ues" << std::endl;
             while(cursor < static_cast<int>(filesize)){
 
                 ContainerHeader gendc_descriptor= ContainerHeader(filecontent + cursor);
@@ -83,19 +90,50 @@ int main(int argc, char* argv[]){
                 std::cout << "GenDC Data size: " << data_size << std::endl;
 
                 // get first available component
-                std::tuple<int32_t, int32_t> data_comp_and_part = gendc_descriptor.getFirstAvailableDataOffset(true);
-                std::cout << "First available image data component is Comp " 
-                    << std::get<0>(data_comp_and_part)
-                    << ", Part "
-                    << std::get<1>(data_comp_and_part) << std::endl;
-                std::cout << "\tData size: " << gendc_descriptor.getDataSize(std::get<0>(data_comp_and_part), std::get<1>(data_comp_and_part)) << std::endl;
-                std::cout << "\tData offset: " << gendc_descriptor.getDataOffset(std::get<0>(data_comp_and_part), std::get<1>(data_comp_and_part)) << std::endl;
+                #define ComponentIDIntensity 1
+                // the other values: https://www.emva.org/wp-content/uploads/GenICam_SFNC_v2_7.pdf
+                int32_t image_component_index = gendc_descriptor.getFirstComponentIndexWithDatatypeOf(ComponentIDIntensity);
+                std::cout << "First available image data component is Comp " << image_component_index << std::endl;
 
-                int offset = gendc_descriptor.getOffsetFromTypeSpecific(std::get<0>(data_comp_and_part), std::get<1>(data_comp_and_part), 3, 0);
-                std::cout << "Framecount: " << *reinterpret_cast<int*>(filecontent + cursor + offset) << std::endl;
+                ComponentHeader image_component = gendc_descriptor.getComponentHeader(image_component_index);
+
+                uint8_t* imagedata;
+                imagedata = new uint8_t [image_component.getDataSize()];
+                int32_t datasize = image_component.getData(reinterpret_cast<char*>(imagedata));
+
+                std::vector<int32_t> image_dimension = image_component.getImageDimension();
+                std::cout << "\tSize of image: ";
+                int32_t WxHxC = 1;
+                for (int i = 0; i < image_dimension.size(); ++i){
+                    if (i > 0){
+                        std::cout << "x";
+                    }
+                    std::cout << image_dimension[i];
+                    WxHxC *= image_dimension[i];
+                }
+                std::cout << std::endl;
+
+                // get byte-depth of pixel from data size and dimension
+                int32_t bd = datasize / WxHxC;
+                std::cout << "\tByte-depth of image: " << bd << std::endl;
+
+                // Note that opencv mat type should be CV_<bit-depth>UC<channel num>
+                cv::Mat img(image_dimension[1], image_dimension[0], CV_8UC1);
+                std::memcpy(img.ptr(), imagedata, datasize);
+                cv::imshow("First available image component", img);
+
+                cv::waitKeyEx(1);
+
+                // Access to Comp 0, Part 0's TypeSpecific 3 (where typespecific count start with 1)
+                PartHeader partheader0 = image_component.getPartHeader(0);
+                int offset = partheader0.getOffsetofTypeSpecific(3);
+                // the following API is equivalent
+                // offset = gendc_descriptor.getOffsetofTypeSpecific(0, 0, 3, 0);
+                std::cout << "Framecount: " << *reinterpret_cast<uint32_t*>(filecontent + cursor + offset) << std::endl;
                 
                 cursor += (descriptor_size + data_size);
                 std::cout << std::endl;
+
             }
         }else{
             std::cout << "This is not GenDC Format data.\n" << 
