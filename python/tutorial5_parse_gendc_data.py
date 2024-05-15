@@ -10,7 +10,7 @@ GDC_INTENSITY = 1
 
 if __name__ == "__main__":
 
-    directory_name = "tutorial_save_gendc_xxxxxxxxxxxx"
+    directory_name = "tutorial_save_gendc_XXXXXXXXXXXXXX"
     prefix = "gendc0-"
 
     num_device = 1
@@ -43,12 +43,12 @@ if __name__ == "__main__":
                 # get first available component
                 image_component_idx = gendc_container.get_1st_component_idx_by_typeid(GDC_INTENSITY)
                 print("First available image data component is Comp", image_component_idx)
-                image_component = gendc_container.get_component_by_idx(image_component_idx)
+                image_component = gendc_container.get_component_by_index(image_component_idx)
                 part_count = image_component.get_part_count()
                 print("\tData Channel: ", part_count)
 
                 for part_id in range(part_count):
-                    part = image_component.get_part_by_idx(part_id)
+                    part = image_component.get_part_by_index(part_id)
                     dimension = part.get_dimension()
                     print("\tDimension: ", "x".join(str(v) for v in dimension))
                     w_h_c = part_count
