@@ -10,7 +10,7 @@ GDC_INTENSITY = 1
 
 if __name__ == "__main__":
 
-    directory_name = "tutorial_save_gendc_XXXXXXXXXXXXXX"
+    directory_name = "tutorial_save_gendc_XXXXXXXXXXXXXXXX"
     prefix = "gendc0-"
 
     num_device = 1
@@ -37,35 +37,41 @@ if __name__ == "__main__":
                 # get GenDC container information
                 descriptor_size = gendc_container.get_descriptor_size()
                 print("GenDC Descriptor size:", descriptor_size)
-                data_size = gendc_container.get_data_size()
-                print("GenDC Data size:", data_size)
+                container_data_size = gendc_container.get_data_size()
+                print("GenDC Data size:", container_data_size)
 
                 # get first available component
                 image_component_idx = gendc_container.get_1st_component_idx_by_typeid(GDC_INTENSITY)
-                print("First available image data component is Comp", image_component_idx)
+                if image_component_idx == -1:
+                    raise Exception("No available component found")
+                print("First available image data component is Component", image_component_idx)
                 image_component = gendc_container.get_component_by_index(image_component_idx)
                 part_count = image_component.get_part_count()
                 print("\tData Channel: ", part_count)
-
+                cursor = cursor + descriptor_size
                 for part_id in range(part_count):
                     part = image_component.get_part_by_index(part_id)
+                    part_data_size =part.get_data_size()
                     dimension = part.get_dimension()
                     print("\tDimension: ", "x".join(str(v) for v in dimension))
                     w_h_c = part_count
                     for d in dimension:
                         w_h_c *= d
-                    byte_depth = int(data_size / w_h_c)
+                    byte_depth = int(part_data_size / w_h_c)
                     print("\tByte-depth of image", byte_depth)
-                    typespecific3 = part.get("TypeSpecific")[2]
-                    print("Frame count: ", int.from_bytes(typespecific3.to_bytes(8, 'little')[0:4], "little"))
-                    cursor = cursor + gendc_container.get_container_size()
+
+                    typespecific3 = part.get_typespecific_by_index(3)
+                    num_typespecific = int((part.get("HeaderSize") - 40) / 8)
+                    part_data_size = part.get_data_size()
+                    print("Frame count: ", typespecific3)
+
                     width = dimension[0]
                     height = dimension[1]
                     if byte_depth == 1:
                         image = np.frombuffer(part.get_data(), dtype=np.uint8).reshape((height, width))
                     elif byte_depth == 2:
                         image = np.frombuffer(part.get_data(), dtype=np.uint16).reshape((height, width))
-                    user_input = -1
-                    cv2.imshow("img", image)
+                    cv2.imshow("First available image component", image)
                     cv2.waitKey(1)
+                cursor = cursor + container_data_size
             cv2.destroyAllWindows()

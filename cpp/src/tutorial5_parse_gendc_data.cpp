@@ -16,25 +16,28 @@ g++ src/tutorial5_parse_gendc_data.cpp -o tutorial5_parse_gendc_data  \
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
-#include <regex>
 
 #include "gendc_separator/ContainerHeader.h"
 #include "gendc_separator/tools.h"
 
-const std::regex number_pattern(R"(\d+)");
+#define ComponentIDIntensity 1
 
 int extractNumber(const std::string& filename) {
-    std::smatch match;
-    std::regex_search(filename, match, number_pattern);
-    return std::stoi(match[0]);
+    size_t dashPos = filename.rfind('-');
+    size_t dotPos = filename.rfind('.');
+    if (dashPos == std::string::npos || dotPos == std::string::npos || dashPos >= dotPos)
+        return -1;  // Return -1 or throw an exception if the format is not as expected
+
+    std::string number = filename.substr(dashPos + 1, dotPos - dashPos - 1);
+    return std::stoi(number);
 }
 
 int main(int argc, char* argv[]){
 
-    std::string directory_name = "tutorial_save_gendc_XXXXXXXXXXXXXX";
+    std::string directory_name = "tutorial_save_gendc_XXXXXXXXXXXXXXXXXX";
     int num_device = 1; // you may also get this number from config.json
-    std::string prefix = "sensor0-";
-    
+    std::string prefix = "gendc0-";
+
     if (!std::filesystem::exists(directory_name)) {
         std::cerr << "Error: Directory '" << directory_name << "' does not exist.\n";
         return 1;
@@ -47,24 +50,27 @@ int main(int argc, char* argv[]){
             bin_files.push_back(entry.path().filename().string());
         }
     }
+    if (bin_files.size() == 0){
+        std::cout << "no detect bin files with prefix " << prefix << " detected" <<std::endl;
+    }
 
     //re-order binary files to sensor0-0.bin, sensor0-1.bin, sensor0-2.bin...
     std::sort(bin_files.begin(), bin_files.end(), [](const std::string& a, const std::string& b) {
         return extractNumber(a) < extractNumber(b);
     });
 
-    for (const auto& filename : bin_files){
-        std::filesystem::path jth_bin= std::filesystem::path(directory_name) / std::filesystem::path(filename);
+    for (const auto& filename : bin_files) {
+        std::filesystem::path jth_bin = std::filesystem::path(directory_name) / std::filesystem::path(filename);
 
         std::ifstream ifs(jth_bin, std::ios::binary);
-        if (!ifs.is_open()){
+        if (!ifs.is_open()) {
             throw std::runtime_error("Failed to open " + filename);
         }
 
         ifs.seekg(0, std::ios::end);
         std::streampos filesize = ifs.tellg();
         ifs.seekg(0, std::ios::beg);
-        char* filecontent = new char[filesize];
+        char *filecontent = new char[filesize];
 
         if (!ifs.read(filecontent, filesize)) {
             delete[] filecontent;
@@ -74,67 +80,70 @@ int main(int argc, char* argv[]){
         int cursor = 0;
 
         // Check if the binary file has GenDC signature
-        if (isGenDC(filecontent)){
-            std::cout << " ues" << std::endl;
-            while(cursor < static_cast<int>(filesize)){
+        if (isGenDC(filecontent)) {
+            while (cursor < static_cast<int>(filesize)) {
 
-                ContainerHeader gendc_descriptor= ContainerHeader(filecontent + cursor);
-
+                ContainerHeader gendc_descriptor = ContainerHeader(filecontent + cursor);
                 // The following API to show all information of the container.
-                //gendc_descriptor.DisplayHeaderInfo(); 
-                
+                //gendc_descriptor.DisplayHeaderInfo();
+
                 // get GenDC container information
                 int32_t descriptor_size = gendc_descriptor.getDescriptorSize();
                 std::cout << "GenDC Descriptor size: " << descriptor_size << std::endl;
-                int64_t data_size = gendc_descriptor.getContainerDataSize();
-                std::cout << "GenDC Data size: " << data_size << std::endl;
+                int64_t container_data_size = gendc_descriptor.getDataSize();
+                std::cout << "GenDC Data size: " << container_data_size << std::endl;
 
                 // get first available component
-                #define ComponentIDIntensity 1
+
                 // the other values: https://www.emva.org/wp-content/uploads/GenICam_SFNC_v2_7.pdf
-                int32_t image_component_index = gendc_descriptor.getFirstComponentIndexWithDatatypeOf(ComponentIDIntensity);
+                int32_t image_component_index = gendc_descriptor.getFirstComponentIndexByTypeID(ComponentIDIntensity);
+
+                ComponentHeader image_component = gendc_descriptor.getComponentByIndex(image_component_index);
                 std::cout << "First available image data component is Comp " << image_component_index << std::endl;
 
-                ComponentHeader image_component = gendc_descriptor.getComponentHeader(image_component_index);
+                int part_count = image_component.getPartCount();
+                std::cout << "\tData Channel: " << part_count << std::endl;
 
-                uint8_t* imagedata;
-                imagedata = new uint8_t [image_component.getDataSize()];
-                int32_t datasize = image_component.getData(reinterpret_cast<char*>(imagedata));
+                int part_data_cursor = cursor + descriptor_size;
+                for (int idx = 0; idx < part_count; idx++) {
+                    PartHeader part = image_component.getPartByIndex(idx);
+                    uint8_t *imagedata;
+                    int part_data_size = part.getDataSize();
+                    imagedata = new uint8_t[part_data_size];
+                    part.getData(reinterpret_cast<char *>(imagedata));
 
-                std::vector<int32_t> image_dimension = image_component.getImageDimension();
-                std::cout << "\tSize of image: ";
-                int32_t WxHxC = 1;
-                for (int i = 0; i < image_dimension.size(); ++i){
-                    if (i > 0){
-                        std::cout << "x";
+                    std::vector <int32_t> image_dimension = part.getDimension();
+                    std::cout << "\tSize of image: ";
+                    int32_t WxHxC = 1;
+                    for (int i = 0; i < image_dimension.size(); ++i) {
+                        if (i > 0) {
+                            std::cout << "x";
+                        }
+                        std::cout << image_dimension[i];
+                        WxHxC *= image_dimension[i];
                     }
-                    std::cout << image_dimension[i];
-                    WxHxC *= image_dimension[i];
+                    // get byte-depth of pixel from data size and dimension
+                    int32_t bd = part_data_size / WxHxC;
+                    std::cout << "\tByte-depth of image: " << bd << std::endl;
+
+                    // Note that opencv mat type should be CV_<bit-depth>UC<channel num>
+                    cv::Mat img(image_dimension[1], image_dimension[0], CV_8UC1);
+                    std::memcpy(img.ptr(), imagedata, part_data_size);
+                    cv::imshow("First available image component", img);
+
+                    cv::waitKeyEx(1);
+
+                    // Access to Comp 0, Part 0's TypeSpecific 3 (where typespecific count start with 1)
+                    int framecount = part.getTypeSpecificByIndex(3);
+
+                    std::cout << "Framecount: " << framecount<< std::endl;
+                    part_data_cursor +=  part_data_size;
                 }
-                std::cout << std::endl;
-
-                // get byte-depth of pixel from data size and dimension
-                int32_t bd = datasize / WxHxC;
-                std::cout << "\tByte-depth of image: " << bd << std::endl;
-
-                // Note that opencv mat type should be CV_<bit-depth>UC<channel num>
-                cv::Mat img(image_dimension[1], image_dimension[0], CV_8UC1);
-                std::memcpy(img.ptr(), imagedata, datasize);
-                cv::imshow("First available image component", img);
-
-                cv::waitKeyEx(1);
-
-                // Access to Comp 0, Part 0's TypeSpecific 3 (where typespecific count start with 1)
-                PartHeader partheader0 = image_component.getPartHeader(0);
-                int offset = partheader0.getOffsetofTypeSpecific(3);
-                // the following API is equivalent
-                // offset = gendc_descriptor.getOffsetofTypeSpecific(0, 0, 3, 0);
-                std::cout << "Framecount: " << *reinterpret_cast<uint32_t*>(filecontent + cursor + offset) << std::endl;
-                
-                cursor += (descriptor_size + data_size);
-                std::cout << std::endl;
-
+                cursor += descriptor_size + container_data_size;
             }
+
+
+            delete[] filecontent;
         }else{
             std::cout << "This is not GenDC Format data.\n" << 
                 "If you save this with image_io_binarysaver_u{}x{} BB, the data structure is\n" << 
@@ -147,8 +156,6 @@ int main(int argc, char* argv[]){
             throw std::runtime_error("This is not GenDC Format");
         }
     }
-
-    
 
     return 0; 
 }
