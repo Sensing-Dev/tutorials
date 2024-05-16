@@ -16,7 +16,7 @@ if __name__ == "__main__":
     num_device = 1
 
     if not (os.path.exists(directory_name) and os.path.isdir(directory_name)):
-        raise Exception("Directory" + directory_name + " does not exist")
+        raise Exception("Directory " + directory_name + " does not exist")
 
     bin_files = [f for f in os.listdir(directory_name) if f.startswith(prefix) and f.endswith(".bin")]
     bin_files = sorted(bin_files, key=lambda s: int(s.split('-')[-1].split('.')[0]))

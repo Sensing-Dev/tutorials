@@ -35,7 +35,7 @@ int extractNumber(const std::string& filename) {
 int main(int argc, char* argv[]){
 
     std::string directory_name = "tutorial_save_gendc_XXXXXXXXXXXXXXXXXX";
-    std::string prefix = "sensor0-";
+    std::string prefix = "gendc0-";
 
     if (!std::filesystem::exists(directory_name)) {
         std::cerr << "Error: Directory '" << directory_name << "' does not exist.\n";

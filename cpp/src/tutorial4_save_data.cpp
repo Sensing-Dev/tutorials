@@ -59,7 +59,7 @@ int build_and_process_pipeline(int width, int height, int payloadsize, int num_d
         int32_t payloadsize1 = payloadsize;
         Node n1 = b.add("image_io_binary_gendc_saver")(n["gendc"][1], n["device_info"][1], &payloadsize)
         .set_param(
-            Param("prefix", "sensor1-"),
+            Param("prefix", "gendc1-"),
             Param("output_directory", saving_diretctory)
         );
         Halide::Buffer<int> output1 = Halide::Buffer<int>::make_scalar();
@@ -68,7 +68,7 @@ int build_and_process_pipeline(int width, int height, int payloadsize, int num_d
 
     n = b.add("image_io_binary_gendc_saver")(n["gendc"][0], n["device_info"][0], &payloadsize)
         .set_param(
-            Param("prefix", "sensor0-"),
+            Param("prefix", "gendc0-"),
             Param("output_directory", saving_diretctory)
         );
 
