@@ -133,7 +133,9 @@ int main(int argc, char* argv[]){
                     cv::waitKeyEx(1);
 
                     // Access to Comp 0, Part 0's TypeSpecific 3 (where typespecific count start with 1)
-                    int framecount = part.getTypeSpecificByIndex(3);
+                    int64_t typespecific3 = part.getTypeSpecificByIndex(3);
+                    // Access to the first 4-byte of typespecific3
+                    int32_t framecount = static_cast<int32_t>(typespecific3 & 0xFFFFFFFF);
 
                     std::cout << "Framecount: " << framecount<< std::endl;
                     part_data_cursor +=  part_data_size;
