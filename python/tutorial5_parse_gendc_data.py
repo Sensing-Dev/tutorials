@@ -61,9 +61,7 @@ if __name__ == "__main__":
                     print("\tByte-depth of image", byte_depth)
 
                     typespecific3 = part.get_typespecific_by_index(3)
-                    num_typespecific = int((part.get("HeaderSize") - 40) / 8)
-                    part_data_size = part.get_data_size()
-                    print("Frame count: ", typespecific3)
+                    print("Framecount: ", int.from_bytes(typespecific3.to_bytes(8, 'little')[0:4], "little")) 
 
                     width = dimension[0]
                     height = dimension[1]
