@@ -9,7 +9,7 @@ jobs:
   test-cpp:
     runs-on: windows-latest
     env: 
-      SDK_VERSION: v24.05.01
+      SDK_VERSION: v24.05.02
     strategy:
         matrix:
           tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count]
