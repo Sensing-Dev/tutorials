@@ -43,7 +43,7 @@ if __name__ == "__main__":
     t_node0 = builder.add("image_io_binary_gendc_saver")\
         .set_iport([node.get_port('gendc')[0], node.get_port('device_info')[0], payloadsize_p, ])\
         .set_param([output_directory,
-                    Param('prefix', 'sensor0-') ])
+                    Param('prefix', 'gendc0-') ])
 
     # create halide buffer for output port
     terminator0 = t_node0.get_port('output')
