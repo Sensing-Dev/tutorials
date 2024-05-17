@@ -60,7 +60,9 @@ if __name__ == "__main__":
                     byte_depth = int(part_data_size / w_h_c)
                     print("\tByte-depth of image", byte_depth)
 
-                    typespecific3 = part.get_typespecific_by_index(3)
+                    # Access to Comp 0, Part 0's TypeSpecific 3 (where typespecific count start with 1; therefore, index is 2)
+                    typespecific3 = part.get_typespecific_by_index(2)
+                    # Access to the first 4-byte of typespecific3
                     print("Framecount: ", int.from_bytes(typespecific3.to_bytes(8, 'little')[0:4], "little")) 
 
                     width = dimension[0]
