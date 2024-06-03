@@ -41,7 +41,7 @@ g++ src/tutorial4_save_data.cpp -o tutorial4_save_data  \
 
 using namespace ion;
 
-int build_and_process_pipeline(int width, int height, int payloadsize, int num_device, std::string saving_diretctory){
+int build_and_process_pipeline(int width, int height, std::vector<int32_t>& payloadsize, int num_device, std::string saving_diretctory){
     // pipeline setup
     Builder b;
     b.set_target(ion::get_host_target());
@@ -56,8 +56,8 @@ int build_and_process_pipeline(int width, int height, int payloadsize, int num_d
       );
 
     if (num_device == 2){
-        int32_t payloadsize1 = payloadsize;
-        Node n1 = b.add("image_io_binary_gendc_saver")(n["gendc"][1], n["device_info"][1], &payloadsize)
+        int32_t payloadsize1 = payloadsize[1];
+        Node n1 = b.add("image_io_binary_gendc_saver")(n["gendc"][1], n["device_info"][1], &payloadsize1)
         .set_param(
             Param("prefix", "gendc1-"),
             Param("output_directory", saving_diretctory)
@@ -65,8 +65,8 @@ int build_and_process_pipeline(int width, int height, int payloadsize, int num_d
         Halide::Buffer<int> output1 = Halide::Buffer<int>::make_scalar();
         n1["output"].bind(output1);
     }
-
-    n = b.add("image_io_binary_gendc_saver")(n["gendc"][0], n["device_info"][0], &payloadsize)
+    int32_t payloadsize0 = payloadsize[0];
+    n = b.add("image_io_binary_gendc_saver")(n["gendc"][0], n["device_info"][0], &payloadsize0)
         .set_param(
             Param("prefix", "gendc0-"),
             Param("output_directory", saving_diretctory)
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]){
         // `arv-tool-0.8 -n "<name of device>" control PixelFormat Width Height PayloadSize`
         int32_t width = 1920;
         int32_t height = 1080;
-        int32_t payloadsize = 2074880;
+        std::vector<int32_t> payloadsize = {2074880, 2074880};
 
         int32_t num_device = 2;
 
