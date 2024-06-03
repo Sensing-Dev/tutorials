@@ -14,7 +14,7 @@ if __name__ == "__main__":
     width = 1920
     height = 1080
     pixelformat = "Mono8"
-    payloadsize = 2074880
+    payloadsize = [2074880, 2074880]
 
     num_device = 2
 
@@ -28,7 +28,9 @@ if __name__ == "__main__":
     builder.with_bb_module('ion-bb')
 
     # set port
-    payloadsize_p = Port('payloadsize', Type(TypeCode.Int, 32, 1), 0)
+    payloadsize_ps = []
+    for i in range(num_device):
+        payloadsize_ps.append(Port('payloadsize' + str(i), Type(TypeCode.Int, 32, 1), 0))
 
     # set params
     num_devices = Param('num_devices', str(num_device))
@@ -41,7 +43,7 @@ if __name__ == "__main__":
         .set_param([num_devices, frame_sync, realtime_diaplay_mode, ])
 
     t_node0 = builder.add("image_io_binary_gendc_saver")\
-        .set_iport([node.get_port('gendc')[0], node.get_port('device_info')[0], payloadsize_p, ])\
+        .set_iport([node.get_port('gendc')[0], node.get_port('device_info')[0], payloadsize_ps[0], ])\
         .set_param([output_directory,
                     Param('prefix', 'gendc0-') ])
 
@@ -51,19 +53,20 @@ if __name__ == "__main__":
     terminator0.bind(output0)
 
 
-    # bind input values to the input port
-    payloadsize_p.bind(payloadsize)
-
-
     if num_device ==2 :
         t_node1 = builder.add("image_io_binary_gendc_saver") \
-            .set_iport([node.get_port('gendc')[1], node.get_port('device_info')[1], payloadsize_p, ]) \
+            .set_iport([node.get_port('gendc')[1], node.get_port('device_info')[1], payloadsize_ps[1], ]) \
             .set_param([output_directory,
                         Param('prefix', 'gendc1-')])
         # create halide buffer for output port
         terminator1 = t_node1.get_port('output')
         output1 = Buffer(Type(TypeCode.Int, 32, 1), ())
         terminator1.bind(output1)
+
+    # bind input values to the input port
+    for i in range(num_device):
+        payloadsize_ps[i].bind(payloadsize[i])
+    
 
     num_run = 0
     print("Press ctrl-C to stop saving")

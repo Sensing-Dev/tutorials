@@ -79,7 +79,7 @@ if __name__ == "__main__":
     for i in range(num_device):
         gain_ps[i].bind(gain_values[i])
         exposure_ps[i].bind(exposure_values[i])
-        output_p[i].bind(outputs[i])
+    output_p.bind(outputs)
 
     # prepare Opencv 
     buf_size_opencv = (height, width)
