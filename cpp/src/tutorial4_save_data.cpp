@@ -55,6 +55,12 @@ int build_and_process_pipeline(int width, int height, std::vector<int32_t>& payl
         Param("realtime_diaplay_mode", false)
       );
 
+    // create halide buffer for output port
+    std::vector<Halide::Buffer<int>> outputs;
+    for (int i = 0; i < num_device; ++i){
+        outputs.push_back(Halide::Buffer<int>::make_scalar());
+    }
+
     if (num_device == 2){
         int32_t payloadsize1 = payloadsize[1];
         Node n1 = b.add("image_io_binary_gendc_saver")(n["gendc"][1], n["device_info"][1], &payloadsize1)
@@ -62,8 +68,7 @@ int build_and_process_pipeline(int width, int height, std::vector<int32_t>& payl
             Param("prefix", "gendc1-"),
             Param("output_directory", saving_diretctory)
         );
-        Halide::Buffer<int> output1 = Halide::Buffer<int>::make_scalar();
-        n1["output"].bind(output1);
+        n1["output"].bind(outputs[1]);
     }
     int32_t payloadsize0 = payloadsize[0];
     n = b.add("image_io_binary_gendc_saver")(n["gendc"][0], n["device_info"][0], &payloadsize0)
@@ -72,9 +77,8 @@ int build_and_process_pipeline(int width, int height, std::vector<int32_t>& payl
             Param("output_directory", saving_diretctory)
         );
 
-    // create halide buffer for output port
-    Halide::Buffer<int> output = Halide::Buffer<int>::make_scalar();
-    n["output"].bind(output);
+    // bind halide buffer for output port
+    n["output"].bind(outputs[0]);
 
     int32_t num_run = 0;
 
