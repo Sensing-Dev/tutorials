@@ -1,8 +1,9 @@
 /*
 
-g++ src/tutorial5_parse_gendc_data.cpp -o tutorial5_parse_gendc_data  \
+g++ src/tutorial5_parse_gendc_data.cpp -o tutorial5_parse_gendc_data \
 -I /opt/sensing-dev/include/opencv4 \
 -I /opt/sensing-dev/include \
+-ldl -lpthread -lopencv_core \
 -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc
 
 */
