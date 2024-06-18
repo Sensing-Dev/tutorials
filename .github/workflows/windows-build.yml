@@ -12,7 +12,7 @@ jobs:
       SDK_VERSION: v24.05.05
     strategy:
         matrix:
-          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_gendc_data, tutorial5_parse_gendc_data]
+          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_gendc_data, tutorial4_save_image_bin_data, tutorial5_parse_gendc_data]
       
     steps:
       - name: Checkout repository
