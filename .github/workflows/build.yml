@@ -1,0 +1,98 @@
+name: Build Test on GCC and MSVC
+
+on:
+  pull_request:
+    branches:
+      - '*'  # This will run the build and test jobs for pull requests to all branches
+
+jobs:
+  test-cpp:
+    runs-on: ${{ matrix.os }}
+    env: 
+      LD_LIBRARY_PATH: /opt/sensing-dev/lib:/opt/sensing-dev/lib/x86_64-linux-gnu
+      SDK_VERSION: v24.05.05
+    strategy:
+        matrix:
+          os: [ubuntu-22.04, windows-2019, windows-latest]
+          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_data, tutorial5_parse_gendc_data]
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+        with:
+          submodules: recursive
+
+      - name: Install sensing-dev SDK on Ubuntu 22.04
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          dl_version=$(echo ${{ env.SDK_VERSION }} | cut -d'-' -f1)
+          echo "$dl_version will be installed"
+          mkdir setup_dir && cd setup_dir
+          wget -O setup.sh https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${{ env.SDK_VERSION}}/setup.sh
+          chmod +x ${GITHUB_WORKSPACE}/setup_dir/setup.sh
+          sudo bash ${GITHUB_WORKSPACE}/setup_dir/setup.sh --install-opencv -v $dl_version
+
+      - name: Build ${{ matrix.tutorial_file_name}} with GCC
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          cd cpp
+          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/${{ matrix.tutorial_file_name}}.cpp)
+          echo "Python script output: $python_output"
+          eval "$python_output"
+
+      - name: Check if ${{ matrix.tutorial_file_name }} exists on Ubuntu 22.04
+        if: matrix.os == 'ubuntu-22.04'
+        uses: andstor/file-existence-action@v3
+        with:
+          files: cpp/${{ matrix.tutorial_file_name}}
+          fail: true
+
+      - name: Install sensing-dev SDK on Windows MSVC 2019
+        if: matrix.os == 'windows-2019'
+        run: |
+          mkdir setup_dir && cd setup_dir
+          Invoke-WebRequest -Uri https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${{ env.SDK_VERSION }}/installer.ps1 -OutFile installer.ps1 -Verbose
+          powershell.exe -ExecutionPolicy Bypass -File ./installer.ps1 -user $env:USERNAME -version ${{ env.SDK_VERSION }} -InstallOpenCV
+          echo 'SENSING_DEV_ROOT=$env:SENSING_DEV_ROOT' >> $GITHUB_ENV
+
+      - name: Install sensing-dev SDK on Windows MSVC 2019
+        if: matrix.os == 'windows-2022'
+        run: |
+          mkdir setup_dir && cd setup_dir
+          Invoke-WebRequest -Uri https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${{ env.SDK_VERSION }}/installer.ps1 -OutFile installer.ps1 -Verbose
+          powershell.exe -ExecutionPolicy Bypass -File ./installer.ps1 -user $env:USERNAME -version ${{ env.SDK_VERSION }} -InstallOpenCV
+          echo 'SENSING_DEV_ROOT=$env:SENSING_DEV_ROOT' >> $GITHUB_ENV
+
+      - name: Check if ${{ matrix.tutorial_file_name }} exists on Windows
+        if: ${{ (matrix.os == 'windows-2019') && (matrix.os == 'windows-2022') }}
+        id: check_file
+        run: |
+          $filePath = "${env:LOCALAPPDATA}\sensing-dev\opencv"
+          if (Test-Path $filePath) {
+            Write-Output "File exists: $filePath"
+            Write-Output "::set-output name=file_exists::true"
+          } else {
+            Write-Output "File does not exist: $filePath"
+            Write-Output "::set-output name=file_exists::false"
+            exit 1
+          }
+
+      - name: Build ${{ matrix.tutorial_file_name}} on Windows
+        if: matrix.os == 'windows-2019'
+        run: |
+          $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
+          Write-Host PATH = $PATH
+          $env:PATH="$env:PATH;$PATH"
+
+          $GST_PLUGIN_PATH =  [Environment]::GetEnvironmentVariable("GST_PLUGIN_PATH", "User")
+          Write-Host GST_PLUGIN_PATH = $GST_PLUGIN_PATH
+          $env:GST_PLUGIN_PATH=${GST_PLUGIN_PATH} 
+
+          $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
+          Write-Host SENSING_DEV_ROOT = $SENSING_DEV_ROOT
+          $env:SENSING_DEV_ROOT=${SENSING_DEV_ROOT}
+
+          cd cpp
+          mkdir build && cd build
+          cmake ../ -DBUILD_TUTORIAL=${{ matrix.tutorial_file_name}}
+          cmake --build . --config Release
