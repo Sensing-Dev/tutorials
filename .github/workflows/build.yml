@@ -102,5 +102,5 @@ jobs:
 
           cd cpp
           mkdir build && cd build
-          cmake ../ -DBUILD_TUTORIAL=${{ matrix.tutorial_file_name}}
+          cmake --trace-expand ../ -DBUILD_TUTORIAL=${{ matrix.tutorial_file_name}}
           cmake --build . --config Release
