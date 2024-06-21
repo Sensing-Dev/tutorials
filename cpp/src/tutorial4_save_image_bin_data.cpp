@@ -74,8 +74,6 @@ int build_and_process_pipeline(
         outputs.push_back(Halide::Buffer<int>::make_scalar());
     }
 
-std::cout << 4 << std::endl;
-
     for (int i = 0; i < num_device; ++i){
         int32_t w = width[i];
         int32_t h = height[i];
@@ -130,9 +128,9 @@ int main(int argc, char* argv[]){
         // `arv-tool-0.8 -n "<name of device>" control PixelFormat Width Height`
         std::vector<int32_t> width = {1920, 1920};
         std::vector<int32_t> height = {1080, 1080};
-        std::string pixel_format = "Mono8";
+        std::string pixel_format = "Mono12";
 
-        int32_t num_device = 1;
+        int32_t num_device = 2;
 
         int ret = build_and_process_pipeline(width, height, pixel_format, num_device, ss.str());
 

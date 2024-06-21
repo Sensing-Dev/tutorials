@@ -14,6 +14,8 @@ include_directories(${SENSING_DEV_DIR}/include/aravis-0.8)
 include_directories(${SENSING_DEV_DIR}/include/glib-2.0)
 include_directories(${SENSING_DEV_DIR}/include/glib-2.0/include)
 
+include_directories(src)
+
 link_directories(${SENSING_DEV_DIR}/bin)
 link_directories(${SENSING_DEV_DIR}/lib)
 
@@ -48,6 +50,7 @@ if(BUILD_TUTORIAL STREQUAL "all")
     add_tutorial_target(tutorial4_save_gendc_data src/tutorial4_save_gendc_data.cpp)
     add_tutorial_target(tutorial4_save_image_bin_data src/tutorial4_save_image_bin_data.cpp)
     add_tutorial_target(tutorial5_parse_gendc_data src/tutorial5_parse_gendc_data.cpp)
+    add_tutorial_target(tutorial5_parse_image_bin_data src/tutorial5_parse_image_bin_data.cpp)
     message(STATUS "All tutorials are ready to build.")
 else()
     foreach(TUTORIAL ${BUILD_TUTORIAL})
