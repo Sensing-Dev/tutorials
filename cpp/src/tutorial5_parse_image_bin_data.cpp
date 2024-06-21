@@ -3,6 +3,7 @@
 g++ src/tutorial5_parse_image_bin_data.cpp -o tutorial5_parse_image_bin_data \
 -I /opt/sensing-dev/include/opencv4 \
 -I /opt/sensing-dev/include \
+-I src \
 -L /opt/sensing-dev/lib \
 -L /opt/sensing-dev/lib/x86_64-linux-gnu \
 -ldl -lpthread -lopencv_core \
