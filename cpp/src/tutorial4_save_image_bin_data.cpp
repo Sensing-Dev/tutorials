@@ -110,7 +110,7 @@ int main(int argc, char* argv[]){
     
     try{
         // Create a saving directory
-        std::string saving_directory_prefix = "tutorial_save_gendc_";
+        std::string saving_directory_prefix = "tutorial_save_image_bin_";
         std::time_t now;
         std::time(&now);
         std::stringstream ss;
