@@ -40,6 +40,23 @@ int positive_pow(int base, int expo){
   }
 }
 
+int getBitShift(int pfnc_pixelformat){
+    if (pfnc_pixelformat == Mono8 || pfnc_pixelformat == RGB8 || pfnc_pixelformat == BGR8){
+        return 0;
+    }else if (pfnc_pixelformat == Mono10){
+        return 2;
+    }
+    else if (pfnc_pixelformat == Mono12){
+        return 4;
+    }else{
+        std::stringstream ss;
+        ss << "0x" << std::hex << std::uppercase << pfnc_pixelformat << " is not supported as default in this tutorial.\nPlease update getBitShift()";
+        std::string hexString = ss.str();
+        throw std::runtime_error(hexString);
+    }
+}
+
+
 int getByteDepth(int pfnc_pixelformat){
     if (pfnc_pixelformat == Mono8 || pfnc_pixelformat == RGB8 || pfnc_pixelformat == BGR8){
         return 1;
@@ -93,8 +110,7 @@ int extractNumber(const std::string& filename) {
 
 int main(int argc, char* argv[]){
 
-    // std::string directory_name = "tutorial_save_image_bin_XXXXXXXXXXXXXXXXXX";
-    std::string directory_name = "tutorial_save_image_bin_20240621141456";
+    std::string directory_name = "tutorial_save_image_bin_XXXXXXXXXXXXXXXXXX";
     std::string prefix = "image0-";
 
     if (!std::filesystem::exists(directory_name)) {
@@ -111,6 +127,8 @@ int main(int argc, char* argv[]){
     int32_t d = getByteDepth(config["pfnc_pixelformat"]);
     int32_t c = getNumChannel(config["pfnc_pixelformat"]);
     int32_t framesize = w * h * d * c;
+
+    int32_t num_bitshift = getBitShift(config["pfnc_pixelformat"]);
 
     std::vector<std::string> bin_files;
     for (const auto& entry : std::filesystem::directory_iterator(directory_name)) {
@@ -153,10 +171,11 @@ int main(int argc, char* argv[]){
 
             cv::Mat img(h, w, getOpenCVMatType(d, c));
             std::memcpy(img.ptr(), filecontent + cursor + 4, framesize);
-            img = img * pow(2, 4);
+            img = img * pow(2, num_bitshift);
             cv::imshow("First available image component", img);
             cursor += 4 + framesize;
 
+            cv::waitKeyEx(1);
         }
 
     }
