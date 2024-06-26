@@ -63,7 +63,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
         .set_param(
           Param("num_devices", num_device),
           Param("frame_sync", true),
-          Param("realtime_diaplay_mode", false),
+          Param("realtime_diaplay_mode", true),
           Param("enable_control", true),
           Param("gain_key", "Gain"),
           Param("exposure_key", "ExposureTime")
@@ -73,7 +73,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
         .set_param(
           Param("num_devices", num_device),
           Param("frame_sync", true),
-          Param("realtime_diaplay_mode", false),
+          Param("realtime_diaplay_mode", true),
           Param("enable_control", true),
           Param("gain_key", "Gain"),
           Param("exposure_key", "ExposureTime")

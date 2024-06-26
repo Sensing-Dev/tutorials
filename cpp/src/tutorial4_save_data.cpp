@@ -52,7 +52,7 @@ int build_and_process_pipeline(int width, int height, std::vector<int32_t>& payl
       .set_param(
         Param("num_devices", num_device),
         Param("frame_sync", true),
-        Param("realtime_diaplay_mode", false)
+        Param("realtime_diaplay_mode", true)
       );
 
     // create halide buffer for output port
