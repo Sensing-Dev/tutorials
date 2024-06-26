@@ -15,7 +15,7 @@ jobs:
     strategy:
         matrix:
           os: [ubuntu-22.04, windows-2019, windows-2022]
-          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_data, tutorial5_parse_gendc_data]
+          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_gendc_data, tutorial4_save_image_bin_data, tutorial5_parse_gendc_data, tutorial5_parse_image_bin_data]
       
     steps:
       - name: Checkout repository
@@ -102,5 +102,5 @@ jobs:
 
           cd cpp
           mkdir build && cd build
-          cmake ../ -DBUILD_TUTORIAL=${{ matrix.tutorial_file_name}}
+          cmake --trace-expand ../ -DBUILD_TUTORIAL=${{ matrix.tutorial_file_name}}
           cmake --build . --config Release

@@ -1,6 +1,6 @@
 /*
 
-g++ src/tutorial4_save_data.cpp -o tutorial4_save_data  \
+g++ src/tutorial4_save_gendc_data.cpp -o tutorial4_save_gendc_data  \
 -I /opt/sensing-dev/include \
 -L /opt/sensing-dev/lib \
 -L /opt/sensing-dev/lib/x86_64-linux-gnu \
@@ -41,7 +41,7 @@ g++ src/tutorial4_save_data.cpp -o tutorial4_save_data  \
 
 using namespace ion;
 
-int build_and_process_pipeline(int width, int height, std::vector<int32_t>& payloadsize, int num_device, std::string saving_diretctory){
+int build_and_process_pipeline(std::vector<int32_t>& payloadsize, int num_device, std::string saving_diretctory){
     // pipeline setup
     Builder b;
     b.set_target(ion::get_host_target());
@@ -119,14 +119,12 @@ int main(int argc, char* argv[]){
         std::filesystem::create_directory(ss.str());
 
         // The following info can be checked with
-        // `arv-tool-0.8 -n "<name of device>" control PixelFormat Width Height PayloadSize`
-        int32_t width = 1920;
-        int32_t height = 1080;
+        // `arv-tool-0.8 -n "<name of device>" control PayloadSize`
         std::vector<int32_t> payloadsize = {2074880, 2074880};
 
         int32_t num_device = 2;
 
-        int ret = build_and_process_pipeline(width, height, payloadsize, num_device, ss.str());
+        int ret = build_and_process_pipeline(payloadsize, num_device, ss.str());
 
     } catch(std::exception& e){
         std::cerr << e.what() << std::endl;
