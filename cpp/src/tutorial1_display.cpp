@@ -61,7 +61,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
         Param{"frame_sync", "true"},
         Param{"gain_key", FEATURE_GAIN_KEY},
         Param{"exposure_key", FEATURE_EXPOSURE_KEY},
-        Param{"realtime_diaplay_mode", "false"}
+        Param{"realtime_diaplay_mode", "true"}
       );
 
     double *gains = (double*) malloc (sizeof (double) * num_device);
