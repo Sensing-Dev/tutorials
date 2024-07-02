@@ -8,6 +8,12 @@ from gendc_python.gendc_separator import descriptor as gendc
 
 GDC_INTENSITY = 1
 
+Mono8 = 0x01080001
+Mono10 = 0x01100003
+Mono12 = 0x01100005
+RGB8 = 0x02180014
+BGR8 = 0x02180015
+
 if __name__ == "__main__":
 
     directory_name = "tutorial_save_gendc_XXXXXXXXXXXXXXXX"
@@ -46,6 +52,14 @@ if __name__ == "__main__":
                     raise Exception("No available component found")
                 print("First available image data component is Component", image_component_idx)
                 image_component = gendc_container.get_component_by_index(image_component_idx)
+
+                pfnc_pixelformat = image_component.get('Format')
+                num_bit_shift = 0 if pfnc_pixelformat == Mono8 or pfnc_pixelformat == RGB8 or  pfnc_pixelformat == BGR8 \
+                    else 4 if pfnc_pixelformat == Mono12 \
+                    else 6 if pfnc_pixelformat == Mono10 \
+                    else 0
+                coef = pow(2, num_bit_shift)
+
                 part_count = image_component.get_part_count()
                 print("\tData Channel: ", part_count)
                 cursor = cursor + descriptor_size
@@ -68,9 +82,10 @@ if __name__ == "__main__":
                     width = dimension[0]
                     height = dimension[1]
                     if byte_depth == 1:
-                        image = np.frombuffer(part.get_data(), dtype=np.uint8).reshape((height, width))
+                        image = np.frombuffer(part.get_data(), dtype=np.uint8).reshape((height, width)).copy()
                     elif byte_depth == 2:
-                        image = np.frombuffer(part.get_data(), dtype=np.uint16).reshape((height, width))
+                        image = np.frombuffer(part.get_data(), dtype=np.uint16).reshape((height, width)).copy()
+                    image *= coef
                     cv2.imshow("First available image component", image)
                     cv2.waitKey(1)
                 cursor = cursor + container_data_size
