@@ -25,6 +25,24 @@ g++ src/tutorial5_parse_gendc_data.cpp -o tutorial5_parse_gendc_data \
 
 #define ComponentIDIntensity 1
 
+int getCVMatType(int byte_depth, std::vector<int32_t>& image_dimension){
+    if (image_dimension.size() == 3){
+        if (image_dimension[2] == 3 && byte_depth == 1){
+            return CV_8UC3;
+        }
+    }else if (image_dimension.size() == 2){
+        if (byte_depth == 1){
+            return CV_8UC1;
+        }else if (byte_depth == 2){
+            return CV_16UC1;
+        }
+    }
+    std::stringstream ss;
+    ss << "This is not supported as default in this tutorial.\nPlease update getCVMatType()";
+    std::string hexString = ss.str();
+    throw std::runtime_error(hexString);
+}
+
 int extractNumber(const std::string& filename) {
     size_t dashPos = filename.rfind('-');
     size_t dotPos = filename.rfind('.');
@@ -129,7 +147,7 @@ int main(int argc, char* argv[]){
                     std::cout << "\tByte-depth of image: " << bd << std::endl;
 
                     // Note that opencv mat type should be CV_<bit-depth>UC<channel num>
-                    cv::Mat img(image_dimension[1], image_dimension[0], CV_8UC1);
+                    cv::Mat img(image_dimension[1], image_dimension[0], getCVMatType(bd, image_dimension));
                     std::memcpy(img.ptr(), imagedata, part_data_size);
                     cv::imshow("First available image component", img);
 
