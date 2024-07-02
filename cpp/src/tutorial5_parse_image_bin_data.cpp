@@ -44,7 +44,7 @@ int getBitShift(int pfnc_pixelformat){
     if (pfnc_pixelformat == Mono8 || pfnc_pixelformat == RGB8 || pfnc_pixelformat == BGR8){
         return 0;
     }else if (pfnc_pixelformat == Mono10){
-        return 2;
+        return 6;
     }
     else if (pfnc_pixelformat == Mono12){
         return 4;

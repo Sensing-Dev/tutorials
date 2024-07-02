@@ -25,6 +25,39 @@ g++ src/tutorial5_parse_gendc_data.cpp -o tutorial5_parse_gendc_data \
 
 #define ComponentIDIntensity 1
 
+#define Mono8 0x01080001
+#define Mono10 0x01100003
+#define Mono12 0x01100005
+#define RGB8 0x02180014
+#define BGR8 0x02180015
+
+int positive_pow(int base, int expo){
+  if (expo <= 0){
+      return 1;
+  }
+  if (expo == 1){
+      return base;
+  }else{
+      return base * positive_pow(base, expo-1);
+  }
+}
+
+int getBitShift(int pfnc_pixelformat){
+    if (pfnc_pixelformat == Mono8 || pfnc_pixelformat == RGB8 || pfnc_pixelformat == BGR8){
+        return 0;
+    }else if (pfnc_pixelformat == Mono10){
+        return 6;
+    }
+    else if (pfnc_pixelformat == Mono12){
+        return 4;
+    }else{
+        std::stringstream ss;
+        ss << "0x" << std::hex << std::uppercase << pfnc_pixelformat << " is not supported as default in this tutorial.\nPlease update getBitShift()";
+        std::string hexString = ss.str();
+        throw std::runtime_error(hexString);
+    }
+}
+
 int getCVMatType(int byte_depth, std::vector<int32_t>& image_dimension){
     if (image_dimension.size() == 3){
         if (image_dimension[2] == 3 && byte_depth == 1){
@@ -121,6 +154,12 @@ int main(int argc, char* argv[]){
                 ComponentHeader image_component = gendc_descriptor.getComponentByIndex(image_component_index);
                 std::cout << "First available image data component is Comp " << image_component_index << std::endl;
 
+                // Get PixelFormat
+                // API to get PixelFormat would be added in the future
+                int32_t image_component_header_offset = *reinterpret_cast<int32_t *>(filecontent + cursor + 56 + 8 * image_component_index);
+                int32_t pfnc_pixelformat = *reinterpret_cast<int32_t *>(filecontent + cursor + image_component_header_offset + 40);
+                int32_t num_bitshift = getBitShift(pfnc_pixelformat);             
+
                 int part_count = image_component.getPartCount();
                 std::cout << "\tData Channel: " << part_count << std::endl;
 
@@ -149,6 +188,7 @@ int main(int argc, char* argv[]){
                     // Note that opencv mat type should be CV_<bit-depth>UC<channel num>
                     cv::Mat img(image_dimension[1], image_dimension[0], getCVMatType(bd, image_dimension));
                     std::memcpy(img.ptr(), imagedata, part_data_size);
+                    img = img * pow(2, num_bitshift);
                     cv::imshow("First available image component", img);
 
                     cv::waitKeyEx(1);
