@@ -39,6 +39,12 @@ if __name__ == "__main__":
 
     np_dtype = np.uint8 if d == 1 else np.uint16 
 
+    num_bit_shift = 0 if pixelformat == Mono8 or pixelformat == RGB8 or  pixelformat == BGR8 \
+        else 4 if pixelformat == Mono12 \
+        else 6 if pixelformat == Mono10 \
+        else 0
+    coef = pow(2, num_bit_shift)
+
     bin_files = [f for f in os.listdir(directory_name) if f.startswith(prefix) and f.endswith(".bin")]
     bin_files = sorted(bin_files, key=lambda s: int(s.split('-')[-1].split('.')[0]))
     if len(bin_files) == 0:
@@ -52,7 +58,8 @@ if __name__ == "__main__":
 
             while cursor < len(filecontent):
                 framecount = struct.unpack('I', filecontent[cursor:cursor+4])[0]
-                image = np.frombuffer(filecontent[cursor+4:cursor+4+framesize], dtype=np_dtype).reshape((h, w))
+                image = np.frombuffer(filecontent[cursor+4:cursor+4+framesize], dtype=np_dtype).reshape((h, w)).copy()
+                image *= coef
 
                 print(framecount)
 
