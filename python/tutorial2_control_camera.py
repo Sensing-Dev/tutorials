@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     # set params
     num_devices = Param('num_devices', num_device)
-    frame_sync = Param('frame_sync', False)
+    frame_sync = Param('frame_sync', True)
     realtime_diaplay_mode = Param('realtime_diaplay_mode', True)
     enable_control = Param('enable_control', True)
     gain_key = Param('gain_key', 'Gain')

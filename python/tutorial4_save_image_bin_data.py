@@ -44,9 +44,9 @@ if __name__ == "__main__":
         height_ps.append(Port('height' + str(i), Type(TypeCode.Int, 32, 1), 0))
 
     # set params
-    num_devices = Param('num_devices', str(num_device))
-    frame_sync = Param('frame_sync', 'false')
-    realtime_diaplay_mode = Param('realtime_diaplay_mode', 'true')
+    num_devices = Param('num_devices', num_device)
+    frame_sync = Param('frame_sync', True)
+    realtime_diaplay_mode = Param('realtime_diaplay_mode', True)
     output_directory = Param('output_directory', save_data_directory)
 
     # add a node to pipeline
