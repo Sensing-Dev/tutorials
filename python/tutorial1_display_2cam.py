@@ -47,7 +47,7 @@ if __name__ == "__main__":
     # set params
     num_devices = Param('num_devices', str(num_device))
     pixel_format_ptr = Param('pixel_format_ptr', pixelformat)
-    frame_sync = Param('frame_sync', 'false')
+    frame_sync = Param('frame_sync', 'true')
     gain_key = Param('gain_key', 'Gain')
     exposure_key = Param('exposure_key', 'ExposureTime')
     realtime_diaplay_mode = Param('realtime_diaplay_mode', 'true')
