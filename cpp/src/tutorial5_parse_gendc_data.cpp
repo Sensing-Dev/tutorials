@@ -88,8 +88,19 @@ int extractNumber(const std::string& filename) {
 
 int main(int argc, char* argv[]){
 
-    std::string directory_name = "tutorial_save_gendc_XXXXXXXXXXXXXXXXXX";
+    std::string directory_name = ".";
+    bool user_dummy_data = false;
     std::string prefix = "gendc0-";
+
+    if (argc > 1){
+        for (int i = 1; i < argc; i++){
+            if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--directory") == 0){
+                directory_name = argv[++i];
+            } else if (strcmp(argv[i], "-u") == 0 || strcmp(argv[i], "--use-dummy-data") == 0){
+                user_dummy_data = true;
+            }
+        }
+    }
 
     if (!std::filesystem::exists(directory_name)) {
         std::cerr << "Error: Directory '" << directory_name << "' does not exist.\n";
@@ -98,19 +109,23 @@ int main(int argc, char* argv[]){
     std::cout << "Directory: " << directory_name << std::endl;
 
     std::vector<std::string> bin_files;
-    for (const auto& entry : std::filesystem::directory_iterator(directory_name)) {
-        if (entry.path().filename().string().find(prefix) == 0 && entry.is_regular_file() && entry.path().extension() == ".bin") {
-            bin_files.push_back(entry.path().filename().string());
+    if (user_dummy_data){
+        bin_files.push_back("output.bin");
+    }else{
+        for (const auto& entry : std::filesystem::directory_iterator(directory_name)) {
+            if (entry.path().filename().string().find(prefix) == 0 && entry.is_regular_file() && entry.path().extension() == ".bin") {
+                bin_files.push_back(entry.path().filename().string());
+            }
         }
-    }
-    if (bin_files.size() == 0){
-        std::cout << "no detect bin files with prefix " << prefix << " detected" <<std::endl;
-    }
+        if (bin_files.size() == 0){
+            std::cout << "no detect bin files with prefix " << prefix << " detected" <<std::endl;
+        }
 
-    //re-order binary files to sensor0-0.bin, sensor0-1.bin, sensor0-2.bin...
-    std::sort(bin_files.begin(), bin_files.end(), [](const std::string& a, const std::string& b) {
-        return extractNumber(a) < extractNumber(b);
-    });
+        //re-order binary files to sensor0-0.bin, sensor0-1.bin, sensor0-2.bin...
+        std::sort(bin_files.begin(), bin_files.end(), [](const std::string& a, const std::string& b) {
+            return extractNumber(a) < extractNumber(b);
+        });
+    }
 
     for (const auto& filename : bin_files) {
         std::filesystem::path jth_bin = std::filesystem::path(directory_name) / std::filesystem::path(filename);
@@ -191,7 +206,11 @@ int main(int argc, char* argv[]){
                     img = img * pow(2, num_bitshift);
                     cv::imshow("First available image component", img);
 
-                    cv::waitKeyEx(1);
+                    if (user_dummy_data){
+                        cv::waitKeyEx(0);
+                    }else{
+                        cv::waitKeyEx(1);
+                    }
 
                     // Access to Comp 0, Part 0's TypeSpecific 3 (where typespecific count start with 1; therefore, index is 2)
                     int64_t typespecific3 = part.getTypeSpecificByIndex(2);
