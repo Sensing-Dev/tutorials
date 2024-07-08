@@ -28,16 +28,13 @@ if __name__ == "__main__":
 
     num_device = 1
 
-    if use_dummy_data:
-        import matplotlib.pyplot as plt
-
     if not (os.path.exists(directory_name) and os.path.isdir(directory_name)):
         raise Exception("Directory " + directory_name + " does not exist")
     
     if use_dummy_data:
         bin_files = ['output.bin']
         if not (os.path.isfile(os.path.join(directory_name, 'output.bin'))):
-            raise Exception("dummy data output.bin not found in " + directory_name)
+            raise Exception("dummy data output.bin not found in " + directory_name + '\nPlease Download from https://github.com/Sensing-Dev/GenDC/blob/main/test/generated_stub/output.bin')
     else:
         bin_files = [f for f in os.listdir(directory_name) if f.startswith(prefix) and f.endswith(".bin")]
         bin_files = sorted(bin_files, key=lambda s: int(s.split('-')[-1].split('.')[0]))
@@ -110,11 +107,12 @@ if __name__ == "__main__":
                         cv2.waitKey(1)
 
                 if use_dummy_data:
-                    audio_component_index = gendc_container.get_1st_component_idx_by_sourceid(0x2001)
-                    if audio_component_index == -1:
+                    # audio data ###############################################
+                    component_index = gendc_container.get_1st_component_idx_by_sourceid(0x2001)
+                    if component_index == -1:
                         raise Exception("No available audio component found")
-                    print("First available audio data component is Component", audio_component_index)
-                    audio_component = gendc_container.get_component_by_index(audio_component_index)
+                    print("First available audio data component is Component", component_index)
+                    audio_component = gendc_container.get_component_by_index(component_index)
 
                     part_count = audio_component.get_part_count()
                     print("\tData Channel: ", part_count)
@@ -129,31 +127,45 @@ if __name__ == "__main__":
                         byte_depth = int(part_data_size / w_h_c)
                         print("\tByte-depth of image", byte_depth)
 
-                        # audio specific #######################################
-                        left_and_right_channel = 2
-                        np_dtype = np.int16
-                        dimension.append(left_and_right_channel)
-                        titles = ['L ch', 'R ch']
-                        ########################################################
-                        
-                        audio_part_data = np.frombuffer(part.get_data(), dtype=np_dtype).reshape(dimension).copy()
-                        num_samples, num_data = audio_part_data.shape
+                    # analog data ##############################################
+                    component_index = gendc_container.get_1st_component_idx_by_sourceid(0x3001)
+                    if component_index == -1:
+                        raise Exception("No available analog component found")
+                    print("First available analog data component is Component", component_index)
+                    analog_component = gendc_container.get_component_by_index(component_index)
 
+                    part_count = analog_component.get_part_count()
+                    print("\tData Channel: ", part_count)
+                    for j in range(part_count):
+                        part = analog_component.get_part_by_index(j)
+                        part_data_size =part.get_data_size()
+                        dimension = part.get_dimension()
+                        print("\tDimension: ", "x".join(str(v) for v in dimension))
+                        w_h_c = 1
+                        for d in dimension:
+                            w_h_c *= d
+                        byte_depth = int(part_data_size / w_h_c)
+                        print("\tByte-depth of image", byte_depth)
 
-                        times = np.linspace(0, num_samples/48000, num=num_samples)[:num_samples]
-                        # datas = audio_part_data[]{}
+                    # PMOD data ##############################################
+                    component_index = gendc_container.get_1st_component_idx_by_sourceid(0x4001)
+                    if component_index == -1:
+                        raise Exception("No available PMOD component found")
+                    print("First available PMOD data component is Component", component_index)
+                    pmog_component = gendc_container.get_component_by_index(component_index)
 
-                        fig = plt.figure(figsize=(15, 5))
-                        for kth_plot in range(num_data):
-                            ax = fig.add_subplot(num_data, 1, kth_plot+1)
-                            ax.plot(times, audio_part_data[:, kth_plot])
-                            ax.title.set_text(titles[kth_plot])
-                            ax.set_xlabel("time [s]")
-                            ax.set_ylabel("Amplitude")
-                        plt.show()
-
-
-                        # component_data.append()
+                    part_count = pmog_component.get_part_count()
+                    print("\tData Channel: ", part_count)
+                    for j in range(part_count):
+                        part = pmog_component.get_part_by_index(j)
+                        part_data_size =part.get_data_size()
+                        dimension = part.get_dimension()
+                        print("\tDimension: ", "x".join(str(v) for v in dimension))
+                        w_h_c = 1
+                        for d in dimension:
+                            w_h_c *= d
+                        byte_depth = int(part_data_size / w_h_c)
+                        print("\tByte-depth of image", byte_depth)
 
                 cursor = cursor + container_data_size
             cv2.destroyAllWindows()
