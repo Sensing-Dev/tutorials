@@ -1,4 +1,4 @@
-import re
+import argparse
 import os
 
 import numpy as np
@@ -16,18 +16,32 @@ BGR8 = 0x02180015
 
 if __name__ == "__main__":
 
-    directory_name = "tutorial_save_gendc_XXXXXXXXXXXXXXXX"
+    parser = argparse.ArgumentParser(description="Tutorial: Parse GenDC Data")
+    parser.add_argument('-d', '--directory', default='.', type=str, \
+                        help='Directory that has bin files')
+    parser.add_argument('-u', '--use-dummy-data', \
+                        action='store_true', help='Use Dummy data downloaded from Sensing-Dev/GenDC.')
+
+    directory_name = parser.parse_args().directory
+    use_dummy_data = parser.parse_args().use_dummy_data
     prefix = "gendc0-"
 
     num_device = 1
 
     if not (os.path.exists(directory_name) and os.path.isdir(directory_name)):
         raise Exception("Directory " + directory_name + " does not exist")
+    
+    if use_dummy_data:
+        bin_files = ['output.bin']
+        if not (os.path.isfile(os.path.join(directory_name, 'output.bin'))):
+            raise Exception("dummy data output.bin not found in " + directory_name + '\nPlease Download from https://github.com/Sensing-Dev/GenDC/blob/main/test/generated_stub/output.bin')
+    else:
+        bin_files = [f for f in os.listdir(directory_name) if f.startswith(prefix) and f.endswith(".bin")]
+        bin_files = sorted(bin_files, key=lambda s: int(s.split('-')[-1].split('.')[0]))
 
-    bin_files = [f for f in os.listdir(directory_name) if f.startswith(prefix) and f.endswith(".bin")]
-    bin_files = sorted(bin_files, key=lambda s: int(s.split('-')[-1].split('.')[0]))
-    if len(bin_files) == 0:
-        raise Exception("No bin files with prefix {}  detected".format(prefix))
+        if len(bin_files) == 0:
+            raise Exception("No bin files with prefix {}  detected".format(prefix))
+        
     for bf in bin_files:
         bin_file = os.path.join(directory_name, bf)
 
@@ -46,7 +60,7 @@ if __name__ == "__main__":
                 container_data_size = gendc_container.get_data_size()
                 print("GenDC Data size:", container_data_size)
 
-                # get first available component
+                # get first available image component
                 image_component_idx = gendc_container.get_1st_component_idx_by_typeid(GDC_INTENSITY)
                 if image_component_idx == -1:
                     raise Exception("No available component found")
@@ -68,7 +82,7 @@ if __name__ == "__main__":
                     part_data_size =part.get_data_size()
                     dimension = part.get_dimension()
                     print("\tDimension: ", "x".join(str(v) for v in dimension))
-                    w_h_c = part_count
+                    w_h_c = 1
                     for d in dimension:
                         w_h_c *= d
                     byte_depth = int(part_data_size / w_h_c)
@@ -87,6 +101,71 @@ if __name__ == "__main__":
                         image = np.frombuffer(part.get_data(), dtype=np.uint16).reshape((height, width)).copy()
                     image *= coef
                     cv2.imshow("First available image component", image)
-                    cv2.waitKey(1)
+                    if use_dummy_data:
+                        cv2.waitKey(0)
+                    else:
+                        cv2.waitKey(1)
+
+                if use_dummy_data:
+                    # audio data ###############################################
+                    component_index = gendc_container.get_1st_component_idx_by_sourceid(0x2001)
+                    if component_index == -1:
+                        raise Exception("No available audio component found")
+                    print("First available audio data component is Component", component_index)
+                    audio_component = gendc_container.get_component_by_index(component_index)
+
+                    part_count = audio_component.get_part_count()
+                    print("\tData Channel: ", part_count)
+                    for j in range(part_count):
+                        part = audio_component.get_part_by_index(j)
+                        part_data_size =part.get_data_size()
+                        dimension = part.get_dimension()
+                        print("\tDimension: ", "x".join(str(v) for v in dimension))
+                        w_h_c = 1
+                        for d in dimension:
+                            w_h_c *= d
+                        byte_depth = int(part_data_size / w_h_c)
+                        print("\tByte-depth of image", byte_depth)
+
+                    # analog data ##############################################
+                    component_index = gendc_container.get_1st_component_idx_by_sourceid(0x3001)
+                    if component_index == -1:
+                        raise Exception("No available analog component found")
+                    print("First available analog data component is Component", component_index)
+                    analog_component = gendc_container.get_component_by_index(component_index)
+
+                    part_count = analog_component.get_part_count()
+                    print("\tData Channel: ", part_count)
+                    for j in range(part_count):
+                        part = analog_component.get_part_by_index(j)
+                        part_data_size =part.get_data_size()
+                        dimension = part.get_dimension()
+                        print("\tDimension: ", "x".join(str(v) for v in dimension))
+                        w_h_c = 1
+                        for d in dimension:
+                            w_h_c *= d
+                        byte_depth = int(part_data_size / w_h_c)
+                        print("\tByte-depth of image", byte_depth)
+
+                    # PMOD data ##############################################
+                    component_index = gendc_container.get_1st_component_idx_by_sourceid(0x4001)
+                    if component_index == -1:
+                        raise Exception("No available PMOD component found")
+                    print("First available PMOD data component is Component", component_index)
+                    pmog_component = gendc_container.get_component_by_index(component_index)
+
+                    part_count = pmog_component.get_part_count()
+                    print("\tData Channel: ", part_count)
+                    for j in range(part_count):
+                        part = pmog_component.get_part_by_index(j)
+                        part_data_size =part.get_data_size()
+                        dimension = part.get_dimension()
+                        print("\tDimension: ", "x".join(str(v) for v in dimension))
+                        w_h_c = 1
+                        for d in dimension:
+                            w_h_c *= d
+                        byte_depth = int(part_data_size / w_h_c)
+                        print("\tByte-depth of image", byte_depth)
+
                 cursor = cursor + container_data_size
             cv2.destroyAllWindows()

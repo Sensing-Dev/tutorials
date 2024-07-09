@@ -88,8 +88,19 @@ int extractNumber(const std::string& filename) {
 
 int main(int argc, char* argv[]){
 
-    std::string directory_name = "tutorial_save_gendc_XXXXXXXXXXXXXXXXXX";
+    std::string directory_name = ".";
+    bool user_dummy_data = false;
     std::string prefix = "gendc0-";
+
+    if (argc > 1){
+        for (int i = 1; i < argc; i++){
+            if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--directory") == 0){
+                directory_name = argv[++i];
+            } else if (strcmp(argv[i], "-u") == 0 || strcmp(argv[i], "--use-dummy-data") == 0){
+                user_dummy_data = true;
+            }
+        }
+    }
 
     if (!std::filesystem::exists(directory_name)) {
         std::cerr << "Error: Directory '" << directory_name << "' does not exist.\n";
@@ -98,19 +109,23 @@ int main(int argc, char* argv[]){
     std::cout << "Directory: " << directory_name << std::endl;
 
     std::vector<std::string> bin_files;
-    for (const auto& entry : std::filesystem::directory_iterator(directory_name)) {
-        if (entry.path().filename().string().find(prefix) == 0 && entry.is_regular_file() && entry.path().extension() == ".bin") {
-            bin_files.push_back(entry.path().filename().string());
+    if (user_dummy_data){
+        bin_files.push_back("output.bin");
+    }else{
+        for (const auto& entry : std::filesystem::directory_iterator(directory_name)) {
+            if (entry.path().filename().string().find(prefix) == 0 && entry.is_regular_file() && entry.path().extension() == ".bin") {
+                bin_files.push_back(entry.path().filename().string());
+            }
         }
-    }
-    if (bin_files.size() == 0){
-        std::cout << "no detect bin files with prefix " << prefix << " detected" <<std::endl;
-    }
+        if (bin_files.size() == 0){
+            std::cout << "no detect bin files with prefix " << prefix << " detected" <<std::endl;
+        }
 
-    //re-order binary files to sensor0-0.bin, sensor0-1.bin, sensor0-2.bin...
-    std::sort(bin_files.begin(), bin_files.end(), [](const std::string& a, const std::string& b) {
-        return extractNumber(a) < extractNumber(b);
-    });
+        //re-order binary files to sensor0-0.bin, sensor0-1.bin, sensor0-2.bin...
+        std::sort(bin_files.begin(), bin_files.end(), [](const std::string& a, const std::string& b) {
+            return extractNumber(a) < extractNumber(b);
+        });
+    }
 
     for (const auto& filename : bin_files) {
         std::filesystem::path jth_bin = std::filesystem::path(directory_name) / std::filesystem::path(filename);
@@ -172,7 +187,7 @@ int main(int argc, char* argv[]){
                     part.getData(reinterpret_cast<char *>(imagedata));
 
                     std::vector <int32_t> image_dimension = part.getDimension();
-                    std::cout << "\tSize of image: ";
+                    std::cout << "\tDimension: ";
                     int32_t WxHxC = 1;
                     for (int i = 0; i < image_dimension.size(); ++i) {
                         if (i > 0) {
@@ -181,9 +196,10 @@ int main(int argc, char* argv[]){
                         std::cout << image_dimension[i];
                         WxHxC *= image_dimension[i];
                     }
+                    std::cout << std::endl;
                     // get byte-depth of pixel from data size and dimension
                     int32_t bd = part_data_size / WxHxC;
-                    std::cout << "\tByte-depth of image: " << bd << std::endl;
+                    std::cout << "\tByte-depth: " << bd << std::endl;
 
                     // Note that opencv mat type should be CV_<bit-depth>UC<channel num>
                     cv::Mat img(image_dimension[1], image_dimension[0], getCVMatType(bd, image_dimension));
@@ -191,7 +207,11 @@ int main(int argc, char* argv[]){
                     img = img * pow(2, num_bitshift);
                     cv::imshow("First available image component", img);
 
-                    cv::waitKeyEx(1);
+                    if (user_dummy_data){
+                        cv::waitKeyEx(0);
+                    }else{
+                        cv::waitKeyEx(1);
+                    }
 
                     // Access to Comp 0, Part 0's TypeSpecific 3 (where typespecific count start with 1; therefore, index is 2)
                     int64_t typespecific3 = part.getTypeSpecificByIndex(2);
@@ -201,6 +221,94 @@ int main(int argc, char* argv[]){
                     std::cout << "Framecount: " << framecount<< std::endl;
                     part_data_cursor +=  part_data_size;
                 }
+
+                if (user_dummy_data){
+                    // audio data ==============================================
+                    int audio_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(0x2001);
+                    std::cout << "First available audio data component is Comp " << audio_component_index << std::endl;
+                    ComponentHeader audio_component = gendc_descriptor.getComponentByIndex(audio_component_index);
+
+                    int audio_part_count = audio_component.getPartCount();
+                    std::cout << "\tData Channel: " << audio_part_count << std::endl;
+
+                    for (int idx = 0; idx < audio_part_count; idx++) {
+                        PartHeader part = audio_component.getPartByIndex(idx);
+                        int part_data_size = part.getDataSize();
+
+                        std::vector <int32_t> audio_dimension = part.getDimension();
+                        std::cout << "\tDimension: ";
+                        int32_t WxHxC = 1;
+                        for (int i = 0; i < audio_dimension.size(); ++i) {
+                            if (i > 0) {
+                                std::cout << "x";
+                            }
+                            std::cout << audio_dimension[i];
+                            WxHxC *= audio_dimension[i];
+                        }
+                        std::cout << std::endl;
+                        // get byte-depth of pixel from data size and dimension
+                        int32_t bd = part_data_size / WxHxC;
+                        std::cout << "\tByte-depth: " << bd << std::endl;
+                    }
+
+                    // analog data =============================================
+                    int analog_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(0x3001);
+                    std::cout << "First available analog data component is Comp " << analog_component_index << std::endl;
+                    ComponentHeader analog_component = gendc_descriptor.getComponentByIndex(analog_component_index);
+
+                    int analog_part_count = analog_component.getPartCount();
+                    std::cout << "\tData Channel: " << analog_part_count << std::endl;
+
+                    for (int idx = 0; idx < analog_part_count; idx++) {
+                        PartHeader part = analog_component.getPartByIndex(idx);
+                        int part_data_size = part.getDataSize();
+
+                        std::vector <int32_t> analog_dimension = part.getDimension();
+                        std::cout << "\tDimension: ";
+                        int32_t WxHxC = 1;
+                        for (int i = 0; i < analog_dimension.size(); ++i) {
+                            if (i > 0) {
+                                std::cout << "x";
+                            }
+                            std::cout << analog_dimension[i];
+                            WxHxC *= analog_dimension[i];
+                        }
+                        std::cout << std::endl;
+                        // get byte-depth of pixel from data size and dimension
+                        int32_t bd = part_data_size / WxHxC;
+                        std::cout << "\tByte-depth: " << bd << std::endl;
+                    }
+
+                    // pmod data ===============================================
+                    int pmod_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(0x4001);
+                    std::cout << "First available analog data component is Comp " << pmod_component_index << std::endl;
+                    ComponentHeader pmod_component = gendc_descriptor.getComponentByIndex(pmod_component_index);
+
+                    int pmod_part_count = pmod_component.getPartCount();
+                    std::cout << "\tData Channel: " << pmod_part_count << std::endl;
+
+                    for (int idx = 0; idx < pmod_part_count; idx++) {
+                        PartHeader part = pmod_component.getPartByIndex(idx);
+                        int part_data_size = part.getDataSize();
+
+                        std::vector <int32_t> pmod_dimension = part.getDimension();
+                        std::cout << "\tDimension: ";
+                        int32_t WxHxC = 1;
+                        for (int i = 0; i < pmod_dimension.size(); ++i) {
+                            if (i > 0) {
+                                std::cout << "x";
+                            }
+                            std::cout << pmod_dimension[i];
+                            WxHxC *= pmod_dimension[i];
+                        }
+                        std::cout << std::endl;
+                        // get byte-depth of pixel from data size and dimension
+                        int32_t bd = part_data_size / WxHxC;
+                        std::cout << "\tByte-depth: " << bd << std::endl;
+                    }
+                }
+
+
                 cursor += descriptor_size + container_data_size;
             }
 
