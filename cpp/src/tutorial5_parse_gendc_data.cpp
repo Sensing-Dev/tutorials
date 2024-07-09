@@ -187,7 +187,7 @@ int main(int argc, char* argv[]){
                     part.getData(reinterpret_cast<char *>(imagedata));
 
                     std::vector <int32_t> image_dimension = part.getDimension();
-                    std::cout << "\tSize of image: ";
+                    std::cout << "\tDimension: ";
                     int32_t WxHxC = 1;
                     for (int i = 0; i < image_dimension.size(); ++i) {
                         if (i > 0) {
@@ -196,9 +196,10 @@ int main(int argc, char* argv[]){
                         std::cout << image_dimension[i];
                         WxHxC *= image_dimension[i];
                     }
+                    std::cout << std::endl;
                     // get byte-depth of pixel from data size and dimension
                     int32_t bd = part_data_size / WxHxC;
-                    std::cout << "\tByte-depth of image: " << bd << std::endl;
+                    std::cout << "\tByte-depth: " << bd << std::endl;
 
                     // Note that opencv mat type should be CV_<bit-depth>UC<channel num>
                     cv::Mat img(image_dimension[1], image_dimension[0], getCVMatType(bd, image_dimension));
@@ -220,6 +221,94 @@ int main(int argc, char* argv[]){
                     std::cout << "Framecount: " << framecount<< std::endl;
                     part_data_cursor +=  part_data_size;
                 }
+
+                if (user_dummy_data){
+                    // audio data ==============================================
+                    int audio_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(0x2001);
+                    std::cout << "First available audio data component is Comp " << audio_component_index << std::endl;
+                    ComponentHeader audio_component = gendc_descriptor.getComponentByIndex(audio_component_index);
+
+                    int audio_part_count = audio_component.getPartCount();
+                    std::cout << "\tData Channel: " << audio_part_count << std::endl;
+
+                    for (int idx = 0; idx < audio_part_count; idx++) {
+                        PartHeader part = audio_component.getPartByIndex(idx);
+                        int part_data_size = part.getDataSize();
+
+                        std::vector <int32_t> audio_dimension = part.getDimension();
+                        std::cout << "\tDimension: ";
+                        int32_t WxHxC = 1;
+                        for (int i = 0; i < audio_dimension.size(); ++i) {
+                            if (i > 0) {
+                                std::cout << "x";
+                            }
+                            std::cout << audio_dimension[i];
+                            WxHxC *= audio_dimension[i];
+                        }
+                        std::cout << std::endl;
+                        // get byte-depth of pixel from data size and dimension
+                        int32_t bd = part_data_size / WxHxC;
+                        std::cout << "\tByte-depth: " << bd << std::endl;
+                    }
+
+                    // analog data =============================================
+                    int analog_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(0x3001);
+                    std::cout << "First available analog data component is Comp " << analog_component_index << std::endl;
+                    ComponentHeader analog_component = gendc_descriptor.getComponentByIndex(analog_component_index);
+
+                    int analog_part_count = analog_component.getPartCount();
+                    std::cout << "\tData Channel: " << analog_part_count << std::endl;
+
+                    for (int idx = 0; idx < analog_part_count; idx++) {
+                        PartHeader part = analog_component.getPartByIndex(idx);
+                        int part_data_size = part.getDataSize();
+
+                        std::vector <int32_t> analog_dimension = part.getDimension();
+                        std::cout << "\tDimension: ";
+                        int32_t WxHxC = 1;
+                        for (int i = 0; i < analog_dimension.size(); ++i) {
+                            if (i > 0) {
+                                std::cout << "x";
+                            }
+                            std::cout << analog_dimension[i];
+                            WxHxC *= analog_dimension[i];
+                        }
+                        std::cout << std::endl;
+                        // get byte-depth of pixel from data size and dimension
+                        int32_t bd = part_data_size / WxHxC;
+                        std::cout << "\tByte-depth: " << bd << std::endl;
+                    }
+
+                    // pmod data ===============================================
+                    int pmod_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(0x4001);
+                    std::cout << "First available analog data component is Comp " << pmod_component_index << std::endl;
+                    ComponentHeader pmod_component = gendc_descriptor.getComponentByIndex(pmod_component_index);
+
+                    int pmod_part_count = pmod_component.getPartCount();
+                    std::cout << "\tData Channel: " << pmod_part_count << std::endl;
+
+                    for (int idx = 0; idx < pmod_part_count; idx++) {
+                        PartHeader part = pmod_component.getPartByIndex(idx);
+                        int part_data_size = part.getDataSize();
+
+                        std::vector <int32_t> pmod_dimension = part.getDimension();
+                        std::cout << "\tDimension: ";
+                        int32_t WxHxC = 1;
+                        for (int i = 0; i < pmod_dimension.size(); ++i) {
+                            if (i > 0) {
+                                std::cout << "x";
+                            }
+                            std::cout << pmod_dimension[i];
+                            WxHxC *= pmod_dimension[i];
+                        }
+                        std::cout << std::endl;
+                        // get byte-depth of pixel from data size and dimension
+                        int32_t bd = part_data_size / WxHxC;
+                        std::cout << "\tByte-depth: " << bd << std::endl;
+                    }
+                }
+
+
                 cursor += descriptor_size + container_data_size;
             }
 
