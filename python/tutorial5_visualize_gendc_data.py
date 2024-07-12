@@ -84,103 +84,92 @@ if __name__ == "__main__":
     component_index = gendc_container.get_1st_component_idx_by_sourceid(0x2001)
     print("Aduio data component is Component", component_index)
     audio_component = gendc_container.get_component_by_index(component_index)
+    part_count = audio_component.get_part_count()
 
-    for j in range(audio_component.get_part_count()):
+    audio_fig = plt.figure(figsize=(15, 5))
+    titles = ['Audio L ch', 'Audio R ch']
+    ylabels = ['Audio L ch Amplitude', 'Audio R ch Amplitude']
+
+    for j in range(part_count):
         part = audio_component.get_part_by_index(j)
         part_data_size =part.get_data_size()
         dimension = part.get_dimension()
         w_h_c = np.prod(dimension)
         byte_depth = int(part_data_size / w_h_c)
-
-        # audio specific #######################################
-        left_and_right_channel = 2
-        titles = ['Audio L ch', 'Audio R ch']
-        ylabels = ['Audio L ch Amplitude', 'Audio R ch Amplitude']
-        ########################################################
-
-        dimension.append(left_and_right_channel)
-        byte_depth = int(byte_depth / left_and_right_channel)
         
         audio_part_data = np.frombuffer(part.get_data(), dtype=get_numpy_dtype(byte_depth, unsinged=False)).reshape(dimension)
-        num_samples, num_data = audio_part_data.shape
+        num_samples = audio_part_data.shape[0]
+
         times = np.linspace(0, num_samples/(image_fps * num_samples), num=num_samples)[:num_samples]
     
-        audio_fig = plt.figure(figsize=(15, 5))
-        for kth_plot in range(num_data):
-            ax = audio_fig.add_subplot(num_data, 1, kth_plot+1)
-            ax.plot(times, audio_part_data[:, kth_plot])
-            ax.title.set_text(titles[kth_plot])
-            ax.set_xlabel("time [s]")
-            ax.set_ylabel("Amplitude")
-        plt.tight_layout()
+        ax = audio_fig.add_subplot(part_count, 1, j+1)
+        ax.plot(times, audio_part_data)
+        ax.title.set_text(titles[j])
+        ax.set_xlabel("time [s]")
+        ax.set_ylabel("Amplitude")
+    plt.tight_layout()
+
+    # analog data ##########################################################
+    component_index = gendc_container.get_1st_component_idx_by_sourceid(0x3001)
+    print("Analog data component is Component", component_index)
+    analog_component = gendc_container.get_component_by_index(component_index)
+    part_count = analog_component.get_part_count()
+
+    analog_fig = plt.figure(figsize=(15, 5))
+    titles = ['Analog']
+
+    for j in range(part_count):
+        part = analog_component.get_part_by_index(j)
+        part_data_size =part.get_data_size()
+        dimension = part.get_dimension()
+        w_h_c = np.prod(dimension)
+        byte_depth = int(part_data_size / w_h_c)
+
+        analog_part_data = np.frombuffer(part.get_data(), dtype=get_numpy_dtype(byte_depth, unsinged=False)).reshape(dimension)
+        num_samples = analog_part_data.shape[0]
+        times = np.linspace(0, num_samples/(image_fps * num_samples), num=num_samples)[:num_samples]
+
+        ax = analog_fig.add_subplot(part_count, 1, j+1)
+        ax.plot(times, analog_part_data, marker = 'o')
+        ax.title.set_text(titles[j])
+        ax.set_xlabel("time [s]")
+        ax.set_ylabel("Amplitude")
         
-        # analog data ##########################################################
-        component_index = gendc_container.get_1st_component_idx_by_sourceid(0x3001)
-        print("Analog data component is Component", component_index)
-        analog_component = gendc_container.get_component_by_index(component_index)
+    plt.tight_layout()
 
-        part_count = analog_component.get_part_count()
-        for j in range(part_count):
-            part = analog_component.get_part_by_index(j)
-            part_data_size =part.get_data_size()
-            dimension = part.get_dimension()
-            w_h_c = np.prod(dimension)
-            byte_depth = int(part_data_size / w_h_c)
+    # PMOD data ##############################################
+    component_index = gendc_container.get_1st_component_idx_by_sourceid(0x4001)
+    print("PMOD data component is Component", component_index)
+    pmog_component = gendc_container.get_component_by_index(component_index)
+    part_count = pmog_component.get_part_count()
 
-            # analog specific ######################################
-            titles = ['Analog']
-            num_channel = 1
-            ########################################################
+    pmod_fig = plt.figure(figsize=(15, 10))
 
-            dimension.append(num_channel)
-            byte_depth = int(byte_depth / num_channel)
-            
-            analog_part_data = np.frombuffer(part.get_data(), dtype=get_numpy_dtype(byte_depth, unsinged=False)).reshape(dimension)
-            num_samples, num_data = analog_part_data.shape
-            times = np.linspace(0, num_samples/(image_fps * num_samples), num=num_samples)[:num_samples]
+    XYZ = []
 
-            analog_fig = plt.figure(figsize=(15, 5))
-            plt.plot(times, analog_part_data, marker = 'o')
-            plt.title('Analog data')
-            plt.xlabel("time [s]")
-            plt.ylabel("Amplitude")
-            plt.tight_layout()
+    for j in range(part_count):
+        part = pmog_component.get_part_by_index(j)
+        part_data_size =part.get_data_size()
+        dimension = part.get_dimension()
+        w_h_c = np.prod(dimension)
+        byte_depth = int(part_data_size / w_h_c)
 
-        # PMOD data ##############################################
-        component_index = gendc_container.get_1st_component_idx_by_sourceid(0x4001)
-        print("PMOD data component is Component", component_index)
-        pmog_component = gendc_container.get_component_by_index(component_index)
+        pmod_part_data = np.frombuffer(part.get_data(), dtype=get_numpy_dtype(byte_depth, unsinged=False)).reshape(dimension)
+        XYZ.append(pmod_part_data)
 
-        for j in range(pmog_component.get_part_count()):
-            part = pmog_component.get_part_by_index(j)
-            part_data_size =part.get_data_size()
-            dimension = part.get_dimension()
-            w_h_c = np.prod(dimension)
-            byte_depth = int(part_data_size / w_h_c)
+    num_samples = XYZ[0].shape[0]
+    times = np.linspace(0, num_samples/(image_fps * num_samples), num=num_samples)[:num_samples]
+        
+    pmod_fig.tight_layout()
+        
+    ax = pmod_fig.add_subplot(projection='3d')
+    ax.plot(XYZ[0], XYZ[1], XYZ[2], marker = 'o')
+    ax.title.set_text('PMOD Data')
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    plt.tight_layout()
 
-            # PMOD specific ######################################
-            xyz_coordinate_num = 4 #(x, y, z, _)
-            titles = ['PMOD x', 'PMOD y', 'PMOD z']
-            ########################################################
-
-            dimension.append(xyz_coordinate_num)
-            byte_depth = int(byte_depth / xyz_coordinate_num)
-
-            pmod_part_data = np.frombuffer(part.get_data(), dtype=get_numpy_dtype(byte_depth, unsinged=False)).reshape(dimension)
-            num_samples, num_data = pmod_part_data.shape
-            times = np.linspace(0, num_samples/(image_fps * num_samples), num=num_samples)[:num_samples]
-
-            pmod_fig = plt.figure(figsize=(15, 10))
-            pmod_fig.tight_layout()
-            
-            ax = pmod_fig.add_subplot(projection='3d')
-            ax.plot(pmod_part_data[:, 0], pmod_part_data[:, 1], pmod_part_data[:, 2], marker = 'o')
-            ax.title.set_text(titles[kth_plot])
-            ax.set_xlabel("x")
-            ax.set_ylabel("y")
-            ax.set_zlabel("z")
-            plt.tight_layout()
-    
-        plt.show()
+    plt.show()
 
 
