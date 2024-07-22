@@ -52,7 +52,7 @@ int build_and_process_pipeline(std::vector<int32_t>& payloadsize, int num_device
       .set_param(
         Param("num_devices", num_device),
         Param("frame_sync", true),
-        Param("realtime_diaplay_mode", true)
+        Param("realtime_display_mode", true)
       );
 
     // create halide buffer for output port
