@@ -65,7 +65,7 @@ int build_and_process_pipeline(
       .set_param(
         Param("num_devices", num_device),
         Param("frame_sync", true),
-        Param("realtime_diaplay_mode", false)
+        Param("realtime_display_mode", false)
       );
 
     // create halide buffer for output port
