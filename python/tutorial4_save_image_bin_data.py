@@ -1,11 +1,8 @@
 import numpy as np
 import datetime
+from aravis import Aravis
 
-import os
-if os.name == 'nt':
-    os.add_dll_directory(os.path.join(os.environ["SENSING_DEV_ROOT"], "bin"))
-
-from ionpy import Node, Builder, Buffer, PortMap, Port, Param, Type, TypeCode
+from ionpy import Node, Builder, Buffer,  Port, Param, Type, TypeCode
 
 if __name__ == "__main__":
 
