@@ -1,8 +1,10 @@
 import numpy as np
 import cv2
-
+import aravis
 from aravis import Aravis
 from ionpy import Node, Builder, Buffer,  Port, Param, Type, TypeCode
+import ctypes
+
 
 if __name__ == "__main__":
 
@@ -34,12 +36,12 @@ if __name__ == "__main__":
 
     # set params
     num_devices = Param('num_devices', num_device)
-    frame_sync = Param('frame_sync', True)
-    realtime_display_mode = Param('realtime_display_mode', True)
+    frame_sync = Param('frame_sync', False)
+    realtime_display_mode = Param('realtime_diaplay_mode', True)
 
     # add a node to pipeline
     node = builder.add(bb_name)\
-        .set_param([num_devices, frame_sync, realtime_display_mode, ])
+        .set_params([num_devices, frame_sync, realtime_display_mode, ])
     output_p = node.get_port('output')
 
     # create halide buffer for output port

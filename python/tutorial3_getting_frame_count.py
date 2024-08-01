@@ -34,12 +34,12 @@ if __name__ == "__main__":
 
     # set params
     num_devices = Param('num_devices', num_device)
-    frame_sync = Param('frame_sync', True)
-    realtime_display_mode = Param('realtime_display_mode', True)
+    frame_sync = Param('frame_sync', False)
+    realtime_display_mode = Param('realtime_diaplay_mode', True)
 
     # add a node to pipeline
     node = builder.add(bb_name) \
-        .set_param([num_devices, frame_sync, realtime_display_mode, ])
+        .set_params([num_devices, frame_sync, realtime_display_mode, ])
     output_p = node.get_port('output')
     frame_count_p = node.get_port('frame_count')
 

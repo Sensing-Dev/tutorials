@@ -3,6 +3,7 @@ import datetime
 from aravis import Aravis
 
 from ionpy import Node, Builder, Buffer,  Port, Param, Type, TypeCode
+import os
 
 if __name__ == "__main__":
 
@@ -31,17 +32,17 @@ if __name__ == "__main__":
 
     # set params
     num_devices = Param('num_devices', num_device)
-    frame_sync = Param('frame_sync', True)
-    realtime_display_mode = Param('realtime_display_mode', True)
+    frame_sync = Param('frame_sync', False)
+    realtime_display_mode = Param('realtime_diaplay_mode', True)
     output_directory = Param('output_directory', save_data_directory)
 
     # add a node to pipeline
     node = builder.add("image_io_u3v_gendc")\
-        .set_param([num_devices, frame_sync, realtime_display_mode, ])
+        .set_params([num_devices, frame_sync, realtime_display_mode, ])
 
     t_node0 = builder.add("image_io_binary_gendc_saver")\
-        .set_iport([node.get_port('gendc')[0], node.get_port('device_info')[0], payloadsize_ps[0], ])\
-        .set_param([output_directory,
+        .set_iports([node.get_port('gendc')[0], node.get_port('device_info')[0], payloadsize_ps[0], ])\
+        .set_params([output_directory,
                     Param('prefix', 'gendc0-') ])
 
     # create halide buffer for output port
@@ -52,8 +53,8 @@ if __name__ == "__main__":
 
     if num_device ==2 :
         t_node1 = builder.add("image_io_binary_gendc_saver") \
-            .set_iport([node.get_port('gendc')[1], node.get_port('device_info')[1], payloadsize_ps[1], ]) \
-            .set_param([output_directory,
+            .set_iports([node.get_port('gendc')[1], node.get_port('device_info')[1], payloadsize_ps[1], ]) \
+            .set_params([output_directory,
                         Param('prefix', 'gendc1-')])
         # create halide buffer for output port
         terminator1 = t_node1.get_port('output')
