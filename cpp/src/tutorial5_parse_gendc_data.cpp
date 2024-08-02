@@ -151,6 +151,7 @@ int main(int argc, char* argv[]){
         }
 
         int32_t cursor = 0;
+        bool first_container = true;
 
         // Check if the binary file has GenDC signature
         if (isGenDC(filecontent)) {
@@ -227,7 +228,9 @@ int main(int argc, char* argv[]){
                         part_data_cursor +=  part_data_size;
                     }                
                 }else{
-                    std::cout << "Skip Image Component - This GenDC does not have component of typeId " << ComponentIDIntensity << std::endl;
+                    if (first_container){
+                        std::cout << "Skip Image Component - This GenDC does not have component of typeId " << ComponentIDIntensity << std::endl;
+                    }
                 }
 
                 int32_t audio_sourceId = 0x2001;
@@ -259,7 +262,9 @@ int main(int argc, char* argv[]){
                         std::cout << "\tByte-depth: " << bd << std::endl;
                     }
                 }else{
-                    std::cout << "Skip Audio Component - This GenDC does not have component of sourceId " << audio_sourceId << std::endl;
+                    if (first_container){
+                        std::cout << "Skip Audio Component - This GenDC does not have component of sourceId " << audio_sourceId << std::endl;
+                    }
                 }
 
                 int32_t analog_sourceId = 0x3001;
@@ -291,7 +296,9 @@ int main(int argc, char* argv[]){
                         std::cout << "\tByte-depth: " << bd << std::endl;
                     }
                 }else{
-                    std::cout << "Skip Analog Component - This GenDC does not have component of sourceId " << analog_sourceId << std::endl;
+                    if (first_container){
+                        std::cout << "Skip Analog Component - This GenDC does not have component of sourceId " << analog_sourceId << std::endl;
+                    }
                 }
 
                 int32_t pmod_sourceId = 0x4001;
@@ -323,10 +330,13 @@ int main(int argc, char* argv[]){
                         std::cout << "\tByte-depth: " << bd << std::endl;
                     }
                 }else{
-                    std::cout << "Skip Analog Component - This GenDC does not have component of sourceId " << pmod_sourceId << std::endl;
+                    if (first_container){
+                        std::cout << "Skip PMOD Component - This GenDC does not have component of sourceId " << pmod_sourceId << std::endl;
+                    }
                 }
 
                 cursor += static_cast<int32_t>(descriptor_size + container_data_size);
+                first_container = false;
             }
 
 
