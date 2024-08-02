@@ -110,7 +110,12 @@ int main(int argc, char* argv[]){
 
     std::vector<std::string> bin_files;
     if (user_dummy_data){
+        std::filesystem::path sample_data_file = std::filesystem::path(directory_name) / std::filesystem::path("output.bin");
         bin_files.push_back("output.bin");
+        if (!std::filesystem::exists(sample_data_file)) {
+            std::cerr << "Error: Sample data output.bin does not exist under " << directory_name << "/ .\n";
+            return 1;
+        }
     }else{
         for (const auto& entry : std::filesystem::directory_iterator(directory_name)) {
             if (entry.path().filename().string().find(prefix) == 0 && entry.is_regular_file() && entry.path().extension() == ".bin") {
@@ -145,7 +150,7 @@ int main(int argc, char* argv[]){
             throw std::runtime_error("Failed to open " + filename);
         }
 
-        int cursor = 0;
+        int32_t cursor = 0;
 
         // Check if the binary file has GenDC signature
         if (isGenDC(filecontent)) {
@@ -161,70 +166,73 @@ int main(int argc, char* argv[]){
                 int64_t container_data_size = gendc_descriptor.getDataSize();
                 std::cout << "GenDC Data size: " << container_data_size << std::endl;
 
-                // get first available component
+                // get first available image component
 
                 // the other values: https://www.emva.org/wp-content/uploads/GenICam_SFNC_v2_7.pdf
                 int32_t image_component_index = gendc_descriptor.getFirstComponentIndexByTypeID(ComponentIDIntensity);
+                if (image_component_index != -1){
+                    ComponentHeader image_component = gendc_descriptor.getComponentByIndex(image_component_index);
+                    std::cout << "First available image data component is Comp " << image_component_index << std::endl;
 
-                ComponentHeader image_component = gendc_descriptor.getComponentByIndex(image_component_index);
-                std::cout << "First available image data component is Comp " << image_component_index << std::endl;
+                    // Get PixelFormat
+                    // API to get PixelFormat would be added in the future
+                    int32_t image_component_header_offset = *reinterpret_cast<int32_t *>(filecontent + cursor + 56 + 8 * image_component_index);
+                    int32_t pfnc_pixelformat = *reinterpret_cast<int32_t *>(filecontent + cursor + image_component_header_offset + 40);
+                    int32_t num_bitshift = getBitShift(pfnc_pixelformat);   
+                
+                    int part_count = image_component.getPartCount();
+                    std::cout << "\tData Channel: " << part_count << std::endl;
 
-                // Get PixelFormat
-                // API to get PixelFormat would be added in the future
-                int32_t image_component_header_offset = *reinterpret_cast<int32_t *>(filecontent + cursor + 56 + 8 * image_component_index);
-                int32_t pfnc_pixelformat = *reinterpret_cast<int32_t *>(filecontent + cursor + image_component_header_offset + 40);
-                int32_t num_bitshift = getBitShift(pfnc_pixelformat);             
+                    int64_t part_data_cursor = cursor + descriptor_size;
+                    for (int idx = 0; idx < part_count; idx++) {
+                        PartHeader part = image_component.getPartByIndex(idx);
+                        uint8_t *imagedata;
+                        int64_t part_data_size = part.getDataSize();
+                        imagedata = new uint8_t[part_data_size];
+                        part.getData(reinterpret_cast<char *>(imagedata));
 
-                int part_count = image_component.getPartCount();
-                std::cout << "\tData Channel: " << part_count << std::endl;
-
-                int part_data_cursor = cursor + descriptor_size;
-                for (int idx = 0; idx < part_count; idx++) {
-                    PartHeader part = image_component.getPartByIndex(idx);
-                    uint8_t *imagedata;
-                    int part_data_size = part.getDataSize();
-                    imagedata = new uint8_t[part_data_size];
-                    part.getData(reinterpret_cast<char *>(imagedata));
-
-                    std::vector <int32_t> image_dimension = part.getDimension();
-                    std::cout << "\tDimension: ";
-                    int32_t WxHxC = 1;
-                    for (int i = 0; i < image_dimension.size(); ++i) {
-                        if (i > 0) {
-                            std::cout << "x";
+                        std::vector <int32_t> image_dimension = part.getDimension();
+                        std::cout << "\tDimension: ";
+                        int32_t WxHxC = 1;
+                        for (int i = 0; i < image_dimension.size(); ++i) {
+                            if (i > 0) {
+                                std::cout << "x";
+                            }
+                            std::cout << image_dimension[i];
+                            WxHxC *= image_dimension[i];
                         }
-                        std::cout << image_dimension[i];
-                        WxHxC *= image_dimension[i];
-                    }
-                    std::cout << std::endl;
-                    // get byte-depth of pixel from data size and dimension
-                    int32_t bd = part_data_size / WxHxC;
-                    std::cout << "\tByte-depth: " << bd << std::endl;
+                        std::cout << std::endl;
+                        // get byte-depth of pixel from data size and dimension
+                        int32_t bd = static_cast<int32_t>(part_data_size / WxHxC);
+                        std::cout << "\tByte-depth: " << bd << std::endl;
 
-                    // Note that opencv mat type should be CV_<bit-depth>UC<channel num>
-                    cv::Mat img(image_dimension[1], image_dimension[0], getCVMatType(bd, image_dimension));
-                    std::memcpy(img.ptr(), imagedata, part_data_size);
-                    img = img * pow(2, num_bitshift);
-                    cv::imshow("First available image component", img);
+                        // Note that opencv mat type should be CV_<bit-depth>UC<channel num>
+                        cv::Mat img(image_dimension[1], image_dimension[0], getCVMatType(bd, image_dimension));
+                        std::memcpy(img.ptr(), imagedata, part_data_size);
+                        img = img * pow(2, num_bitshift);
+                        cv::imshow("First available image component", img);
 
-                    if (user_dummy_data){
-                        cv::waitKeyEx(0);
-                    }else{
-                        cv::waitKeyEx(1);
-                    }
+                        if (user_dummy_data){
+                            cv::waitKeyEx(0);
+                        }else{
+                            cv::waitKeyEx(1);
+                        }
 
-                    // Access to Comp 0, Part 0's TypeSpecific 3 (where typespecific count start with 1; therefore, index is 2)
-                    int64_t typespecific3 = part.getTypeSpecificByIndex(2);
-                    // Access to the first 4-byte of typespecific3
-                    int32_t framecount = static_cast<int32_t>(typespecific3 & 0xFFFFFFFF);
+                        // Access to Comp 0, Part 0's TypeSpecific 3 (where typespecific count start with 1; therefore, index is 2)
+                        int64_t typespecific3 = part.getTypeSpecificByIndex(2);
+                        // Access to the first 4-byte of typespecific3
+                        int32_t framecount = static_cast<int32_t>(typespecific3 & 0xFFFFFFFF);
 
-                    std::cout << "Framecount: " << framecount<< std::endl;
-                    part_data_cursor +=  part_data_size;
+                        std::cout << "Framecount: " << framecount<< std::endl;
+                        part_data_cursor +=  part_data_size;
+                    }                
+                }else{
+                    std::cout << "Skip Image Component - This GenDC does not have component of typeId " << ComponentIDIntensity << std::endl;
                 }
 
-                if (user_dummy_data){
-                    // audio data ==============================================
-                    int audio_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(0x2001);
+                int32_t audio_sourceId = 0x2001;
+                int audio_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(audio_sourceId);
+                if (audio_component_index != -1){
                     std::cout << "First available audio data component is Comp " << audio_component_index << std::endl;
                     ComponentHeader audio_component = gendc_descriptor.getComponentByIndex(audio_component_index);
 
@@ -233,7 +241,7 @@ int main(int argc, char* argv[]){
 
                     for (int idx = 0; idx < audio_part_count; idx++) {
                         PartHeader part = audio_component.getPartByIndex(idx);
-                        int part_data_size = part.getDataSize();
+                        int64_t part_data_size = part.getDataSize();
 
                         std::vector <int32_t> audio_dimension = part.getDimension();
                         std::cout << "\tDimension: ";
@@ -247,12 +255,16 @@ int main(int argc, char* argv[]){
                         }
                         std::cout << std::endl;
                         // get byte-depth of pixel from data size and dimension
-                        int32_t bd = part_data_size / WxHxC;
+                        int32_t bd = static_cast<int32_t>(part_data_size / WxHxC);
                         std::cout << "\tByte-depth: " << bd << std::endl;
                     }
+                }else{
+                    std::cout << "Skip Audio Component - This GenDC does not have component of sourceId " << audio_sourceId << std::endl;
+                }
 
-                    // analog data =============================================
-                    int analog_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(0x3001);
+                int32_t analog_sourceId = 0x3001;
+                int analog_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(analog_sourceId);
+                if (analog_component_index != -1){
                     std::cout << "First available analog data component is Comp " << analog_component_index << std::endl;
                     ComponentHeader analog_component = gendc_descriptor.getComponentByIndex(analog_component_index);
 
@@ -261,7 +273,7 @@ int main(int argc, char* argv[]){
 
                     for (int idx = 0; idx < analog_part_count; idx++) {
                         PartHeader part = analog_component.getPartByIndex(idx);
-                        int part_data_size = part.getDataSize();
+                        int64_t part_data_size = part.getDataSize();
 
                         std::vector <int32_t> analog_dimension = part.getDimension();
                         std::cout << "\tDimension: ";
@@ -275,12 +287,16 @@ int main(int argc, char* argv[]){
                         }
                         std::cout << std::endl;
                         // get byte-depth of pixel from data size and dimension
-                        int32_t bd = part_data_size / WxHxC;
+                        int32_t bd = static_cast<int32_t>(part_data_size / WxHxC);
                         std::cout << "\tByte-depth: " << bd << std::endl;
                     }
+                }else{
+                    std::cout << "Skip Analog Component - This GenDC does not have component of sourceId " << analog_sourceId << std::endl;
+                }
 
-                    // pmod data ===============================================
-                    int pmod_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(0x4001);
+                int32_t pmod_sourceId = 0x4001;
+                int pmod_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(pmod_sourceId);
+                if (pmod_component_index != -1){
                     std::cout << "First available analog data component is Comp " << pmod_component_index << std::endl;
                     ComponentHeader pmod_component = gendc_descriptor.getComponentByIndex(pmod_component_index);
 
@@ -289,7 +305,7 @@ int main(int argc, char* argv[]){
 
                     for (int idx = 0; idx < pmod_part_count; idx++) {
                         PartHeader part = pmod_component.getPartByIndex(idx);
-                        int part_data_size = part.getDataSize();
+                        int64_t part_data_size = part.getDataSize();
 
                         std::vector <int32_t> pmod_dimension = part.getDimension();
                         std::cout << "\tDimension: ";
@@ -303,13 +319,14 @@ int main(int argc, char* argv[]){
                         }
                         std::cout << std::endl;
                         // get byte-depth of pixel from data size and dimension
-                        int32_t bd = part_data_size / WxHxC;
+                        int32_t bd = static_cast<int32_t>(part_data_size / WxHxC);
                         std::cout << "\tByte-depth: " << bd << std::endl;
                     }
+                }else{
+                    std::cout << "Skip Analog Component - This GenDC does not have component of sourceId " << pmod_sourceId << std::endl;
                 }
 
-
-                cursor += descriptor_size + container_data_size;
+                cursor += static_cast<int32_t>(descriptor_size + container_data_size);
             }
 
 
