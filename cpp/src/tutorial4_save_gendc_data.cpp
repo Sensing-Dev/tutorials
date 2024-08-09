@@ -16,26 +16,39 @@ g++ src/tutorial4_save_gendc_data.cpp -o tutorial4_save_gendc_data  \
 #include <ion/ion.h>
 
 #ifdef _WIN32
-    #include <conio.h>
+    #include <windows.h>
 #else
     #include <sys/ioctl.h>
     #include <termios.h>
+    #include <fcntl.h>
+    #include <unistd.h>
 
-    bool _kbhit()
+    #define VK_SPACE 0x20
+
+    struct termios SetNonBlockInput(){
+        struct termios original_setting, copy_setting;
+        tcgetattr (STDIN_FILENO, &original_setting);
+        tcgetattr (STDIN_FILENO, &copy_setting);
+        copy_setting.c_lflag &= ~ (ICANON | ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &copy_setting);
+
+        int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+        fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+        return original_setting;
+    }
+
+    void ResetTerminal(struct termios terminal_setting){
+        tcsetattr(STDIN_FILENO, TCSANOW, &terminal_setting);
+    }
+
+    short GetAsyncKeyState(short _)
     {
-        termios term;
-        tcgetattr(0, &term);
-
-        termios term_cpy = term;
-        term_cpy.c_lflag &= ~ICANON;
-        tcsetattr(0, TCSANOW, &term_cpy);
-
-        int byteswaiting;
-        ioctl(0, FIONREAD, &byteswaiting);
-
-        tcsetattr(0, TCSANOW, &term);
-
-        return byteswaiting > 0;
+        char ch;
+        ssize_t n = read(STDIN_FILENO, &ch, 1);
+        if (n > 0 && ch == ' '){
+            return 1;
+        }
+        return 0;
     }
 #endif
 
@@ -82,18 +95,26 @@ int build_and_process_pipeline(std::vector<int32_t>& payloadsize, int num_device
 
     int32_t num_run = 0;
 
-    std::cout << "Hit any key to stop saving" << std::endl;
+    std::cout << "Hit SPACE KEY to stop saving" << std::endl;
+
+    #ifndef _WIN32
+        struct termios terminal_setting = SetNonBlockInput();
+    #endif
 
     while(true){
         b.run();
         ++num_run;
 
-        if (_kbhit()) {
+        if (GetAsyncKeyState (VK_SPACE) != 0) {
             break;
         }
     }
     std::cout << num_run << " frames are saved under " << saving_diretctory << std::endl;
 
+    #ifndef _WIN32
+        ResetTerminal(terminal_setting);
+    #endif
+    
     return 0;
 
 }
