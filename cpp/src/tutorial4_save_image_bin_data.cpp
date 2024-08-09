@@ -16,27 +16,27 @@ g++ src/tutorial4_save_image_bin_data.cpp -o tutorial4_save_image_bin_data  \
 #include <ion/ion.h>
 
 #ifdef _WIN32
-    #include <conio.h>
+    #include <windows.h>
 #else
-    #include <sys/ioctl.h>
-    #include <termios.h>
+    // #include <sys/ioctl.h>
+    // #include <termios.h>
 
-    bool _kbhit()
-    {
-        termios term;
-        tcgetattr(0, &term);
+    // bool _kbhit()
+    // {
+    //     termios term;
+    //     tcgetattr(0, &term);
 
-        termios term_cpy = term;
-        term_cpy.c_lflag &= ~ICANON;
-        tcsetattr(0, TCSANOW, &term_cpy);
+    //     termios term_cpy = term;
+    //     term_cpy.c_lflag &= ~ICANON;
+    //     tcsetattr(0, TCSANOW, &term_cpy);
 
-        int byteswaiting;
-        ioctl(0, FIONREAD, &byteswaiting);
+    //     int byteswaiting;
+    //     ioctl(0, FIONREAD, &byteswaiting);
 
-        tcsetattr(0, TCSANOW, &term);
+    //     tcsetattr(0, TCSANOW, &term);
 
-        return byteswaiting > 0;
-    }
+    //     return byteswaiting > 0;
+    // }
 #endif
 
 using namespace ion;
@@ -94,7 +94,7 @@ int build_and_process_pipeline(
         b.run();
         ++num_run;
 
-        if (_kbhit()) {
+        if (GetAsyncKeyState (VK_SPACE) != 0) {
             break;
         }
     }
