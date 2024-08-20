@@ -32,8 +32,8 @@ if __name__ == "__main__":
 
     # set params
     num_devices = Param('num_devices', num_device)
-    frame_sync = Param('frame_sync', False)
-    realtime_display_mode = Param('realtime_diaplay_mode', True)
+    frame_sync = Param('frame_sync', True)
+    realtime_display_mode = Param('realtime_display_mode', True)
     output_directory = Param('output_directory', save_data_directory)
 
     # add a node to pipeline
