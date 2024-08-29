@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-from aravis import Aravis
 
 from ionpy import Node, Builder, Buffer, Port, Param, Type, TypeCode
 

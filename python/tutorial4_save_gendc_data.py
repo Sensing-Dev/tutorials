@@ -1,6 +1,5 @@
 import numpy as np
 import datetime
-from aravis import Aravis
 
 from ionpy import Node, Builder, Buffer,  Port, Param, Type, TypeCode
 import os
