@@ -53,7 +53,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
 
     // add BB to pipeline
     Node n = b.add(bb_name[pixel_format])()
-      .set_param(
+      .set_params(
         Param("num_devices", num_device),
         Param("frame_sync", true),
         Param("realtime_display_mode", true)
