@@ -10,7 +10,6 @@ if __name__ == "__main__":
     # `arv-tool-0.8 -n "<name of device>" control PixelFormat Width Height PayloadSize`
     width = 1920
     height = 1080
-    pixelformat = "Mono8"
     payloadsize = [2074880, 2074880]
 
     num_device = 2
