@@ -12,7 +12,7 @@ endif()
 include_directories(${SENSING_DEV_DIR}/include)
 include_directories(${SENSING_DEV_DIR}/include/aravis-0.8)
 include_directories(${SENSING_DEV_DIR}/include/glib-2.0)
-include_directories(${SENSING_DEV_DIR}/include/glib-2.0/include)
+include_directories(${SENSING_DEV_DIR}/lib/glib-2.0/include)
 
 include_directories(src)
 
