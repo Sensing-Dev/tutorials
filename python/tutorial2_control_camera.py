@@ -1,11 +1,7 @@
 import numpy as np
 import cv2
 
-import os
-if os.name == 'nt':
-    os.add_dll_directory(os.path.join(os.environ["SENSING_DEV_ROOT"], "bin"))
-
-from ionpy import Node, Builder, Buffer, PortMap, Port, Param, Type, TypeCode
+from ionpy import Node, Builder, Buffer, Port, Param, Type, TypeCode
 
 if __name__ == "__main__":
 
@@ -13,7 +9,7 @@ if __name__ == "__main__":
     width = 1920
     height = 1080
     pixelformat = "Mono8"
-    num_device = 1
+    num_device = 2
 
     # the following items varies by PixelFormat
     data_type = np.uint8 if pixelformat == "Mono8" or pixelformat == "RGB8" \
@@ -58,11 +54,11 @@ if __name__ == "__main__":
 
     # add a node to pipeline
     node = builder.add(bb_name)\
-        .set_iport([gain_ps[0], exposure_ps[0]])\
-        .set_param([num_devices, frame_sync, realtime_display_mode, enable_control, gain_key, exposure_key]) if num_device == 1 \
+        .set_iports([gain_ps[0], exposure_ps[0]])\
+        .set_params([num_devices, frame_sync, realtime_display_mode, enable_control, gain_key, exposure_key]) if num_device == 1 \
         else builder.add(bb_name)\
-            .set_iport([gain_ps[0], exposure_ps[0], gain_ps[1], exposure_ps[1]])\
-            .set_param([num_devices, frame_sync, realtime_display_mode, enable_control, gain_key, exposure_key])
+            .set_iports([gain_ps[0], exposure_ps[0], gain_ps[1], exposure_ps[1]])\
+            .set_params([num_devices, frame_sync, realtime_display_mode, enable_control, gain_key, exposure_key])
     output_p = node.get_port('output')
 
     # create halide buffer for output port

@@ -75,7 +75,7 @@ int build_and_process_pipeline(
     // add BB to pipeline
     // the name of image-acquisition BB would vary depending on its PixelFormat
     Node n = b.add(acquisition_bb_name[pixel_format])()
-      .set_param(
+      .set_params(
         Param("num_devices", num_device),
         Param("frame_sync", true),
         Param("realtime_display_mode", true)
@@ -92,7 +92,7 @@ int build_and_process_pipeline(
         int32_t h = height[i];
         std::string prefix = "image" + std::to_string(i) + "-";
         Node child_n = b.add(bin_saver_bb_name[pixel_format])(n["output"][i], n["device_info"][i], n["frame_count"][i], &w, &h)
-        .set_param(
+        .set_params(
             Param("prefix", prefix),
             Param("output_directory", saving_diretctory)
         );

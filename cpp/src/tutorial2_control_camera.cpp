@@ -60,7 +60,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
     Node n;
     if (num_device == 1){
       n = b.add(bb_name[pixel_format])(&gain0, &exposuretime0)
-        .set_param(
+        .set_params(
           Param("num_devices", num_device),
           Param("frame_sync", true),
           Param("realtime_display_mode", true),
@@ -70,7 +70,7 @@ int video(int width, int height, std::string pixel_format, int num_device){
         );
     }else if (num_device == 2){
       n = b.add(bb_name[pixel_format])(&gain0, &exposuretime0, &gain1, &exposuretime1)
-        .set_param(
+        .set_params(
           Param("num_devices", num_device),
           Param("frame_sync", true),
           Param("realtime_display_mode", true),

@@ -62,7 +62,7 @@ int build_and_process_pipeline(std::vector<int32_t>& payloadsize, int num_device
 
     // add BB to pipeline
     Node n = b.add("image_io_u3v_gendc")()
-      .set_param(
+      .set_params(
         Param("num_devices", num_device),
         Param("frame_sync", true),
         Param("realtime_display_mode", true)
@@ -77,7 +77,7 @@ int build_and_process_pipeline(std::vector<int32_t>& payloadsize, int num_device
     if (num_device == 2){
         int32_t payloadsize1 = payloadsize[1];
         Node n1 = b.add("image_io_binary_gendc_saver")(n["gendc"][1], n["device_info"][1], &payloadsize1)
-        .set_param(
+        .set_params(
             Param("prefix", "gendc1-"),
             Param("output_directory", saving_diretctory)
         );
@@ -85,7 +85,7 @@ int build_and_process_pipeline(std::vector<int32_t>& payloadsize, int num_device
     }
     int32_t payloadsize0 = payloadsize[0];
     n = b.add("image_io_binary_gendc_saver")(n["gendc"][0], n["device_info"][0], &payloadsize0)
-        .set_param(
+        .set_params(
             Param("prefix", "gendc0-"),
             Param("output_directory", saving_diretctory)
         );

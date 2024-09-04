@@ -1,12 +1,7 @@
 import numpy as np
 import cv2
 
-import os
-
-if os.name == 'nt':
-    os.add_dll_directory(os.path.join(os.environ["SENSING_DEV_ROOT"], "bin"))
-
-from ionpy import Node, Builder, Buffer, PortMap, Port, Param, Type, TypeCode
+from ionpy import Node, Builder, Buffer, Port, Param, Type, TypeCode
 
 if __name__ == "__main__":
 
@@ -43,7 +38,7 @@ if __name__ == "__main__":
 
     # add a node to pipeline
     node = builder.add(bb_name) \
-        .set_param([num_devices, frame_sync, realtime_display_mode, ])
+        .set_params([num_devices, frame_sync, realtime_display_mode, ])
     output_p = node.get_port('output')
     frame_count_p = node.get_port('frame_count')
 

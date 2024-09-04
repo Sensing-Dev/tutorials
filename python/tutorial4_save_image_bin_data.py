@@ -1,11 +1,7 @@
 import numpy as np
 import datetime
-
 import os
-if os.name == 'nt':
-    os.add_dll_directory(os.path.join(os.environ["SENSING_DEV_ROOT"], "bin"))
-
-from ionpy import Node, Builder, Buffer, PortMap, Port, Param, Type, TypeCode
+from ionpy import Node, Builder, Buffer,  Port, Param, Type, TypeCode
 
 if __name__ == "__main__":
 
@@ -13,7 +9,7 @@ if __name__ == "__main__":
     # `arv-tool-0.8 -n "<name of device>" control PixelFormat Width Height PayloadSize`
     width = [1920, 1920]
     height = [1080, 1080]
-    pixelformat = "Mono12"
+    pixelformat = "Mono8"
     num_device = 2
 
     # the following items varies by PixelFormat
@@ -51,13 +47,13 @@ if __name__ == "__main__":
 
     # add a node to pipeline
     node = builder.add(acquisition_bb_name)\
-        .set_param([num_devices, frame_sync, realtime_display_mode, ])
+        .set_params([num_devices, frame_sync, realtime_display_mode, ])
     
     outputs = []
     for i in range(num_device):
         chile_node = builder.add(bin_saver_bb_name)\
-        .set_iport([node.get_port('output')[i], node.get_port('device_info')[i], node.get_port('frame_count')[i], width_ps[i], height_ps[i]])\
-        .set_param([output_directory,
+        .set_iports([node.get_port('output')[i], node.get_port('device_info')[i], node.get_port('frame_count')[i], width_ps[i], height_ps[i]])\
+        .set_params([output_directory,
                     Param('prefix', 'image' + str(i) + '-') ])
         # create halide buffer for output port
         ith_terminator_p = chile_node.get_port('output')

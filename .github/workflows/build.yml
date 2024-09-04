@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env: 
       LD_LIBRARY_PATH: /opt/sensing-dev/lib:/opt/sensing-dev/lib/x86_64-linux-gnu
-      SDK_VERSION: v24.05.08
+      SDK_VERSION: v24.09.00
       LATEST_OPENCV_VERSION: 4.10.0
     strategy:
         matrix:

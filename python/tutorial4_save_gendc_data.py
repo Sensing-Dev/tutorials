@@ -1,11 +1,8 @@
 import numpy as np
 import datetime
 
+from ionpy import Node, Builder, Buffer,  Port, Param, Type, TypeCode
 import os
-if os.name == 'nt':
-    os.add_dll_directory(os.path.join(os.environ["SENSING_DEV_ROOT"], "bin"))
-
-from ionpy import Node, Builder, Buffer, PortMap, Port, Param, Type, TypeCode
 
 if __name__ == "__main__":
 
@@ -39,11 +36,11 @@ if __name__ == "__main__":
 
     # add a node to pipeline
     node = builder.add("image_io_u3v_gendc")\
-        .set_param([num_devices, frame_sync, realtime_display_mode, ])
+        .set_params([num_devices, frame_sync, realtime_display_mode, ])
 
     t_node0 = builder.add("image_io_binary_gendc_saver")\
-        .set_iport([node.get_port('gendc')[0], node.get_port('device_info')[0], payloadsize_ps[0], ])\
-        .set_param([output_directory,
+        .set_iports([node.get_port('gendc')[0], node.get_port('device_info')[0], payloadsize_ps[0], ])\
+        .set_params([output_directory,
                     Param('prefix', 'gendc0-') ])
 
     # create halide buffer for output port
@@ -54,8 +51,8 @@ if __name__ == "__main__":
 
     if num_device ==2 :
         t_node1 = builder.add("image_io_binary_gendc_saver") \
-            .set_iport([node.get_port('gendc')[1], node.get_port('device_info')[1], payloadsize_ps[1], ]) \
-            .set_param([output_directory,
+            .set_iports([node.get_port('gendc')[1], node.get_port('device_info')[1], payloadsize_ps[1], ]) \
+            .set_params([output_directory,
                         Param('prefix', 'gendc1-')])
         # create halide buffer for output port
         terminator1 = t_node1.get_port('output')
