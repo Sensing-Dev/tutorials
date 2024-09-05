@@ -31,6 +31,7 @@ if __name__ == "__main__":
 
     w = config["width"]
     h = config["height"]
+    pixelformat = config["pfnc_pixelformat"]
     d = 2 if config["pfnc_pixelformat"] == Mono10 or config["pfnc_pixelformat"] == Mono12 \
         else 1
     c = 3 if config["pfnc_pixelformat"] == RGB8 or config["pfnc_pixelformat"] == BGR8 \
