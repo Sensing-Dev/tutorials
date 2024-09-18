@@ -16,7 +16,7 @@ BGR8 = 0x02180015
 
 if __name__ == "__main__":
 
-    directory_name = "tutorial_save_image_bin_20240918165044"
+    directory_name = "tutorial_save_image_bin_XXXXXXXXXXXXXXXX"
     prefix = "image0-"
 
     num_device = 1
