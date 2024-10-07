@@ -54,23 +54,24 @@ int main(int argc, char *argv[])
     }
     n["output"].bind(output);
 
-    for (int i = 0;i<5;i++)
+    for (int i = 0;i<10;i++)
     {
       // JIT compilation and execution of pipelines with Builder.
       b.run();
       // Convert the retrieved buffer object to OpenCV buffer format.
-      for (int i = 0; i < num_device; ++i){
+    }
+
+    for (int i = 0; i < num_device; ++i){
         uint8_t img[height][width];
         std::memcpy(img, output[i].data(), output[i].size_in_bytes());
 
-        for(int i = 0; i < height; i++)
+        for(int row = 0; row < height; row++)
         {
-          for(int j = 0; j < width; j++){
-               std::cout << unsigned(img[i][j]) << " ";
+          for(int col = 0; col < width; col++){
+               std::cout << unsigned(img[row][col]) << " ";
           }
           std::cout << std::endl;
         }
-      }
     }
   } catch(std::exception& e){
     std::cerr << e.what() << std::endl;
