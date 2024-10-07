@@ -4,8 +4,8 @@ from ionpy import Node, Builder, Buffer, Port, Param, Type, TypeCode
 if __name__ == "__main__":
 
     # device information
-    width = 128
-    height = 128
+    width = 640
+    height = 480
     pixelformat = "Mono8"
     num_device = 2
 

@@ -26,8 +26,8 @@ std::map<std::string, std::string> bb_name{
 int main(int argc, char *argv[])
 {
   try{
-    int32_t width = 128;
-    int32_t height = 128;
+    int32_t width = 640;
+    int32_t height = 480;
     int32_t num_device = 2;
     std::string pixelformat = "Mono8";
 
@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
     Node n = b.add(bb_name[pixelformat])()
       .set_params(
         Param("num_devices", num_device),
+        Param("force_sim_mode", true),
         Param("width", width),
         Param("height", height)
       );
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
     }
     n["output"].bind(output);
 
-    for (int i = 0;i<10;i++)
+    for (int i = 0;i<5;i++)
     {
       // JIT compilation and execution of pipelines with Builder.
       b.run();

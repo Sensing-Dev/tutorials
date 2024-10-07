@@ -34,14 +34,23 @@ jobs:
           chmod +x ${GITHUB_WORKSPACE}/setup_dir/setup.sh
           sudo bash ${GITHUB_WORKSPACE}/setup_dir/setup.sh --install-opencv -v $dl_version
 
-      - name: Build ${{ matrix.test_file_name}} with GCC
+      - name: Build fake camera examples with GCC
         if: matrix.os == 'ubuntu-22.04'
         run: |
+          export GENICAM_FILENAME=${GITHUB_WORKSPACE}/test/cpp/src/arv-fake-camera.xml     
           cd  ${GITHUB_WORKSPACE}/test/cpp
-          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/${{ matrix.test_file_name}}.cpp)
+          
+          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_display.cpp)
           echo "Python script output: $python_output"
           eval "$python_output"
-          ./${{ matrix.test_file_name}}
+          
+          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_save.cpp)
+          echo "Python script output: $python_output"
+          eval "$python_output"
+        
+          ./fake_camera_display
+          ./fake_camera_save
+          ls ${GITHUB_WORKSPACE}/test/cpp/
 
       - name: Build ${{ matrix.tutorial_file_name}} with GCC
         if: matrix.os == 'ubuntu-22.04'
