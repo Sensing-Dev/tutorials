@@ -26,8 +26,8 @@ std::map<std::string, std::string> bb_name{
 int main(int argc, char *argv[])
 {
   try{
-    int32_t width = 640;
-    int32_t height = 480;
+    const int32_t width = 128;
+    const int32_t height = 128;
     int32_t num_device = 2;
     std::string pixelformat = "Mono8";
 

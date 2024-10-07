@@ -4,9 +4,6 @@ project(SensingDevTutorial)
 set(CMAKE_CXX_STANDARD 17)
 
 set(SENSING_DEV_DIR $ENV{SENSING_DEV_ROOT})
-if(NOT OpenCV_DIR)
-    set(OpenCV_DIR $ENV{SENSING_DEV_ROOT}/opencv/build)
-endif()
 
 # header files
 include_directories(${SENSING_DEV_DIR}/include)
@@ -31,20 +28,10 @@ function(add_tutorial_target TUTORIAL_NAME SOURCE_FILE)
 endfunction()
 
 # Add each tutorial based on the BUILD_TUTORIAL option
-if(BUILD_TUTORIAL STREQUAL "all")
-    add_tutorial_target()
-    add_tutorial_target(fake_camera_display.cpp src/fake_camera_display.cpp.cpp)
-    message(STATUS "All tutorials are ready to build.")
-else()
-    foreach(TUTORIAL ${BUILD_TUTORIAL})
-        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/${TUTORIAL}.cpp")
-            add_tutorial_target(${TUTORIAL} src/${TUTORIAL}.cpp)
-            message(STATUS "${TUTORIAL}.cpp is ready to build.")
-        else()
-            message(WARNING "${TUTORIAL}.cpp does not exist.")
-        endif()
-    endforeach()
-endif()
+
+add_tutorial_target(fake_camera_display src/fake_camera_display.cpp)
+add_tutorial_target(fake_camera_save src/fake_camera_save.cpp)
+
 #
 # Allow big object
 #

@@ -15,8 +15,9 @@ jobs:
     strategy:
         matrix:
 #          os: [ubuntu-22.04, windows-2019, windows-2022]
-          os: [ubuntu-22.04]
-          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_gendc_data, tutorial4_save_image_bin_data, tutorial5_parse_gendc_data, tutorial5_parse_image_bin_data]
+          os: [windows-2022]
+#          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_gendc_data, tutorial4_save_image_bin_data, tutorial5_parse_gendc_data, tutorial5_parse_image_bin_data]
+          tutorial_file_name: [tutorial0_get_device_info]
           test_file_name: [fake_camera_display]
     steps:
       - name: Checkout repository
@@ -105,6 +106,26 @@ jobs:
             Write-Output "::set-output name=file_exists::false"
             exit 1
           }
+
+      - name: Build fake camera examples on Windows
+        if: ${{ (matrix.os == 'windows-2019') || (matrix.os == 'windows-2022') }}
+        run: |
+          $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
+          Write-Host PATH = $PATH
+          $env:PATH="$env:PATH;$PATH"
+          
+          $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
+          Write-Host SENSING_DEV_ROOT = $SENSING_DEV_ROOT
+          $env:SENSING_DEV_ROOT=${SENSING_DEV_ROOT}
+          
+          $ENV:GENICAM_FILENAME = "${GITHUB_WORKSPACE}/test/cpp/src/arv-fake-camera.xml" 
+          
+          cd  ${GITHUB_WORKSPACE}/test/cpp
+        
+          mkdir build && cd build
+          cmake  ../
+          cmake --build . --config Release
+
 
       - name: Build ${{ matrix.tutorial_file_name}} on Windows
         if: ${{ (matrix.os == 'windows-2019') || (matrix.os == 'windows-2022') }}

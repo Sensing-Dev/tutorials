@@ -51,8 +51,8 @@ int main(int argc, char* argv[]){
 
         // The following info can be checked with
         // `arv-tool-0.8 -n "<name of device>" control PixelFormat Width Height`
-        int width = 640;
-        int height = 480;
+        int width = 128;
+        int height = 128;
         std::string pixel_format = "Mono8";
 
         int32_t num_device = 2;
@@ -90,7 +90,7 @@ int main(int argc, char* argv[]){
 
         int32_t num_run = 0;
 
-       for (int i = 0;i<10;i++){
+       for (int i = 0;i<100;i++){
             b.run();
             ++num_run;
 
