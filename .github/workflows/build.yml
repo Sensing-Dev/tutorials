@@ -117,14 +117,15 @@ jobs:
           $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
           Write-Host SENSING_DEV_ROOT = $SENSING_DEV_ROOT
           $env:SENSING_DEV_ROOT=${SENSING_DEV_ROOT}
-          
-          $ENV:GENICAM_FILENAME = "${GITHUB_WORKSPACE}/test/cpp/src/arv-fake-camera.xml" 
-          
-          cd  ${GITHUB_WORKSPACE}/test/cpp
         
+          cd test/cpp
           mkdir build && cd build
           cmake  ../
-          cmake --build . --config Release
+          cmake --build . --config Release && cd Release
+          $ENV:GENICAM_FILENAME = "../..//src/arv-fake-camera.xml" 
+          ./fake_camera_display
+          ./fake_camera_save
+          
 
 
       - name: Build ${{ matrix.tutorial_file_name}} on Windows
