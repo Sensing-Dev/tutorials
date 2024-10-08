@@ -177,7 +177,7 @@ int main(int argc, char* argv[]){
 
             cv::waitKeyEx(1);
         }
-
+        delete[] filecontent;
     }
 
     return 0; 

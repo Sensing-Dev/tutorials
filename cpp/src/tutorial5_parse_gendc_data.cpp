@@ -226,6 +226,8 @@ int main(int argc, char* argv[]){
 
                         std::cout << "Framecount: " << framecount<< std::endl;
                         part_data_cursor +=  part_data_size;
+
+                        delete[] imagedata;
                     }                
                 }else{
                     if (first_container){
@@ -352,6 +354,7 @@ int main(int argc, char* argv[]){
                 std::cout << "Note that framecount is not frame id. Some device may not have this number, and if so, it is filled with 0." << std::endl;
             throw std::runtime_error("This is not GenDC Format");
         }
+        delete[] filecontent;
     }
 
     return 0; 
