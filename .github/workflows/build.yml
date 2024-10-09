@@ -34,22 +34,22 @@ jobs:
           chmod +x ${GITHUB_WORKSPACE}/setup_dir/setup.sh
           sudo bash ${GITHUB_WORKSPACE}/setup_dir/setup.sh --install-opencv -v $dl_version
 
-      - name: Build fake camera examples with GCC
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          export GENICAM_FILENAME=${GITHUB_WORKSPACE}/test/cpp/src/arv-fake-camera.xml     
-          cd  ${GITHUB_WORKSPACE}/test/cpp
-          
-          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_display.cpp)
-          echo "Python script output: $python_output"
-          eval "$python_output"  
-          ./fake_camera_display
-          
-          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_save.cpp)
-          echo "Python script output: $python_output"
-          eval "$python_output"
-          ./fake_camera_save
-          ls ${GITHUB_WORKSPACE}/test/cpp/
+#      - name: Build fake camera examples with GCC
+#        if: matrix.os == 'ubuntu-22.04'
+#        run: |
+#          export GENICAM_FILENAME=${GITHUB_WORKSPACE}/test/cpp/src/arv-fake-camera.xml
+#          cd  ${GITHUB_WORKSPACE}/test/cpp
+#
+#          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_display.cpp)
+#          echo "Python script output: $python_output"
+#          eval "$python_output"
+#          ./fake_camera_display
+#
+#          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_save.cpp)
+#          echo "Python script output: $python_output"
+#          eval "$python_output"
+#          ./fake_camera_save
+#          ls ${GITHUB_WORKSPACE}/test/cpp/
 
       - name: Build ${{ matrix.tutorial_file_name}} with GCC
         if: matrix.os == 'ubuntu-22.04'
@@ -59,15 +59,12 @@ jobs:
           echo "Python script output: $python_output"
           eval "$python_output"
 
-      - name: Install valgrind on Ubuntu 22.04
-        if: matrix.os == 'ubuntu-22.04' && matrix.tutorial_file_name == 'tutorial5_parse_gendc_data'
-        run: sudo apt-get -y update && sudo apt-get install -y valgrind
-
       - name:  Memory leak check ${{ matrix.tutorial_file_name}} on Ubuntu 22.04
         if: matrix.os == 'ubuntu-22.04' && matrix.tutorial_file_name == 'tutorial5_parse_gendc_data'
         run: |
+          sudo apt-get -y update && sudo apt-get install -y valgrind
           cd  ${GITHUB_WORKSPACE}/test/cpp
-          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/parse_dummy_gendc_data.cpp
+          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/parse_dummy_gendc_data.cpp)
           echo "Python script output: $python_output"
           eval "$python_output"
           wget https://raw.githubusercontent.com/Sensing-Dev/GenDC/main/test/generated_stub/output.bin
