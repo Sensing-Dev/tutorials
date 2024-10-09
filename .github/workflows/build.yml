@@ -62,10 +62,9 @@ jobs:
         if: matrix.os == 'ubuntu-22.04' && startsWith(matrix.tutorial_file_name, 'tutorial5_')
         run: |
           sudo apt-get -y update && sudo apt-get install -y valgrind
+          cd  ${GITHUB_WORKSPACE}/test/cpp
           wget https://raw.githubusercontent.com/Sensing-Dev/GenDC/main/test/generated_stub/output.bin
           cp ${GITHUB_WORKSPACE}/test/cpp/tutorial_save_image*/* ${GITHUB_WORKSPACE}/test/cpp
-          
-          cd  ${GITHUB_WORKSPACE}/test/cpp
           executable=${{ matrix.tutorial_file_name}}
           executable="${executable/tutorial5_/}_dummy"
           python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/$executable.cpp)
