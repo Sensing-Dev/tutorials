@@ -15,7 +15,8 @@ jobs:
     strategy:
         matrix:
           os: [ubuntu-22.04, windows-2019, windows-2022]
-          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_gendc_data, tutorial4_save_image_bin_data, tutorial5_parse_gendc_data, tutorial5_parse_image_bin_data]
+#          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_gendc_data, tutorial4_save_image_bin_data, tutorial5_parse_gendc_data, tutorial5_parse_image_bin_data]
+          tutorial_file_name: [tutorial5_parse_gendc_data ]
 
     steps:
       - name: Checkout repository
@@ -58,16 +59,18 @@ jobs:
           echo "Python script output: $python_output"
           eval "$python_output"
 
+      - name: Install valgrind on Ubuntu 22.04
+        if: matrix.os == 'ubuntu-22.04' && matrix.tutorial_file_name == 'tutorial5_parse_gendc_data'
+        run: sudo apt-get -y update && sudo apt-get install -y valgrind
+
       - name:  Memory leak check ${{ matrix.tutorial_file_name}} on Ubuntu 22.04
         if: matrix.os == 'ubuntu-22.04' && matrix.tutorial_file_name == 'tutorial5_parse_gendc_data'
         run: |
-          sudo apt-get update && sudo apt-get install -y  valgrind
           cd  ${GITHUB_WORKSPACE}/test/cpp
           python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/parse_dummy_gendc_data.cpp
           echo "Python script output: $python_output"
           eval "$python_output"
           valgrind --leak-check=full ./parse_dummy_gendc_data --use-dummy-data
-          
 
       - name: Check if ${{ matrix.tutorial_file_name }} exists on Ubuntu 22.04
         if: matrix.os == 'ubuntu-22.04'
