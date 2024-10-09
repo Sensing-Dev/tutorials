@@ -1,6 +1,6 @@
 /*
 
-g++ src/parse_dummy_gendc_data.cpp -o parse_dummy_gendc_data \
+g++ src/parse_gendc_data_dummy.cpp -o parse_gendc_data_dummy \
 -I /opt/sensing-dev/include/opencv4 \
 -I /opt/sensing-dev/include \
 -L /opt/sensing-dev/lib \

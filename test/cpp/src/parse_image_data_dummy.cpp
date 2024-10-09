@@ -1,6 +1,6 @@
 /*
 
-g++ src/parse_dummy_image_data.cpp -o parse_dummy_image_data \
+g++ src/parse_image_data_dummy.cpp -o parse_image_data_dummy \
 -I /opt/sensing-dev/include/opencv4 \
 -I /opt/sensing-dev/include \
 -I src \
