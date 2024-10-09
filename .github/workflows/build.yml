@@ -58,7 +58,7 @@ jobs:
           echo "Python script output: $python_output"
           eval "$python_output"
 
-      - name:  Memory leak check tutorials 5 on Ubuntu 22.04
+      - name:  Memory leak check ${{ matrix.tutorial_file_name}} on Ubuntu 22.04
         if: matrix.os == 'ubuntu-22.04' && matrix.tutorial_file_name == 'tutorial5_parse_gendc_data'
         run: |
           sudo apt-get update && sudo apt-get install valgrind
