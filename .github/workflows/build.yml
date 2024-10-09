@@ -15,8 +15,7 @@ jobs:
     strategy:
         matrix:
           os: [ubuntu-22.04, windows-2019, windows-2022]
-#          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_gendc_data, tutorial4_save_image_bin_data, tutorial5_parse_gendc_data, tutorial5_parse_image_bin_data]
-          tutorial_file_name: [tutorial5_parse_gendc_data ]
+          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_gendc_data, tutorial4_save_image_bin_data, tutorial5_parse_gendc_data, tutorial5_parse_image_bin_data]
 
     steps:
       - name: Checkout repository
@@ -34,22 +33,21 @@ jobs:
           chmod +x ${GITHUB_WORKSPACE}/setup_dir/setup.sh
           sudo bash ${GITHUB_WORKSPACE}/setup_dir/setup.sh --install-opencv -v $dl_version
 
-#      - name: Build fake camera examples with GCC
-#        if: matrix.os == 'ubuntu-22.04'
-#        run: |
-#          export GENICAM_FILENAME=${GITHUB_WORKSPACE}/test/cpp/src/arv-fake-camera.xml
-#          cd  ${GITHUB_WORKSPACE}/test/cpp
-#
-#          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_display.cpp)
-#          echo "Python script output: $python_output"
-#          eval "$python_output"
-#          ./fake_camera_display
-#
-#          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_save.cpp)
-#          echo "Python script output: $python_output"
-#          eval "$python_output"
-#          ./fake_camera_save
-#          ls ${GITHUB_WORKSPACE}/test/cpp/
+      - name: Build fake camera examples with GCC
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          export GENICAM_FILENAME=${GITHUB_WORKSPACE}/test/cpp/src/arv-fake-camera.xml
+          cd  ${GITHUB_WORKSPACE}/test/cpp
+
+          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_display.cpp)
+          echo "Python script output: $python_output"
+          eval "$python_output"
+          ./fake_camera_display
+
+          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_save.cpp)
+          echo "Python script output: $python_output"
+          eval "$python_output"
+          ./fake_camera_save
 
       - name: Build ${{ matrix.tutorial_file_name}} with GCC
         if: matrix.os == 'ubuntu-22.04'
