@@ -15,7 +15,8 @@ jobs:
     strategy:
         matrix:
           os: [ubuntu-22.04, windows-2019, windows-2022]
-          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_gendc_data, tutorial4_save_image_bin_data, tutorial5_parse_gendc_data, tutorial5_parse_image_bin_data]
+#          tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_gendc_data, tutorial4_save_image_bin_data, tutorial5_parse_gendc_data, tutorial5_parse_image_data]
+          tutorial_file_name: [ tutorial5_parse_gendc_data, tutorial5_parse_image_data ]
 
     steps:
       - name: Checkout repository
@@ -58,15 +59,18 @@ jobs:
           eval "$python_output"
 
       - name:  Memory leak check ${{ matrix.tutorial_file_name}} on Ubuntu 22.04
-        if: matrix.os == 'ubuntu-22.04' && matrix.tutorial_file_name == 'tutorial5_parse_gendc_data'
+        if: matrix.os == 'ubuntu-22.04' && (matrix.tutorial_file_name == 'tutorial5_parse_gendc_data' || matrix.tutorial_file_name == 'tutorial5_parse_image_data')
         run: |
           sudo apt-get -y update && sudo apt-get install -y valgrind
+          wget https://raw.githubusercontent.com/Sensing-Dev/GenDC/main/test/generated_stub/output.bin
+          cp ${GITHUB_WORKSPACE}/test/cpp/tutorial_save_image*/* ${GITHUB_WORKSPACE}/test/cpp
+          
           cd  ${GITHUB_WORKSPACE}/test/cpp
           python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/parse_dummy_gendc_data.cpp)
           echo "Python script output: $python_output"
           eval "$python_output"
-          wget https://raw.githubusercontent.com/Sensing-Dev/GenDC/main/test/generated_stub/output.bin
-          valgrind --leak-check=full ./parse_dummy_gendc_data --use-dummy-data
+
+          valgrind --leak-check=full ./${{ matrix.tutorial_file_name}} --use-dummy-data
 
       - name: Check if ${{ matrix.tutorial_file_name }} exists on Ubuntu 22.04
         if: matrix.os == 'ubuntu-22.04'

@@ -1,6 +1,6 @@
 /*
 
-g++ src/tutorial5_parse_image_bin_data.cpp -o tutorial5_parse_image_bin_data \
+g++ src/parse_dummy_image_data.cpp -o parse_dummy_image_data \
 -I /opt/sensing-dev/include/opencv4 \
 -I /opt/sensing-dev/include \
 -I src \
@@ -90,13 +90,19 @@ int getOpenCVMatType(int d, int c){
         }else if (c == 3){
             return CV_16UC3;
         }
-        else{
-            std::stringstream ss;
-            ss << "byte-depth " << d << ", channel num " << c << " image is not supported as default in this tutorial.\nPlease update getOpenCVMatType()";
-            throw std::runtime_error(ss.str());
+    }else if (d ==1){
+     if (c == 1){
+            return CV_8UC1;
+        }else if (c == 3){
+            return CV_8UC3;
         }
     }
+    std::stringstream ss;
+    ss << "byte-depth " << d << ", channel num " << c << " image is not supported as default in this tutorial.\nPlease update getOpenCVMatType()";
+    throw std::runtime_error(ss.str());
+    return -1;
 }
+
 
 int extractNumber(const std::string& filename) {
     size_t dashPos = filename.rfind('-');
@@ -110,7 +116,7 @@ int extractNumber(const std::string& filename) {
 
 int main(int argc, char* argv[]){
 
-    std::string directory_name = "tutorial_save_image_bin_XXXXXXXXXXXXXXXXXX";
+    std::string directory_name = ".";
     std::string prefix = "image0-";
 
     if (!std::filesystem::exists(directory_name)) {
@@ -168,14 +174,12 @@ int main(int argc, char* argv[]){
         while(cursor < static_cast<int>(filesize)){
             int framecount = *reinterpret_cast<int*>(filecontent + cursor);
             std::cout << framecount << std::endl;
-
             cv::Mat img(h, w, getOpenCVMatType(d, c));
             std::memcpy(img.ptr(), filecontent + cursor + 4, framesize);
             img = img * pow(2, num_bitshift);
-            cv::imshow("First available image component", img);
             cursor += 4 + framesize;
-
-            cv::waitKeyEx(1);
+//            cv::imshow("First available image component", img);
+//            cv::waitKeyEx(1);
         }
         delete[] filecontent;
     }
