@@ -70,6 +70,7 @@ jobs:
           python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/parse_dummy_gendc_data.cpp
           echo "Python script output: $python_output"
           eval "$python_output"
+          wget https://raw.githubusercontent.com/Sensing-Dev/GenDC/main/test/generated_stub/output.bin
           valgrind --leak-check=full ./parse_dummy_gendc_data --use-dummy-data
 
       - name: Check if ${{ matrix.tutorial_file_name }} exists on Ubuntu 22.04
