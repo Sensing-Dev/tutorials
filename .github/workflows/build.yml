@@ -66,11 +66,15 @@ jobs:
           cp ${GITHUB_WORKSPACE}/test/cpp/tutorial_save_image*/* ${GITHUB_WORKSPACE}/test/cpp
           
           cd  ${GITHUB_WORKSPACE}/test/cpp
-          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/parse_dummy_gendc_data.cpp)
+          
+          executable=${{ matrix.tutorial_file_name}}
+          executable="${executable/tutorial5_/}_dummy"
+          
+          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/$executable.cpp)
           echo "Python script output: $python_output"
           eval "$python_output"
 
-          valgrind --leak-check=full ./${{ matrix.tutorial_file_name}} --use-dummy-data
+          valgrind --leak-check=full ./$executable --use-dummy-data
 
       - name: Check if ${{ matrix.tutorial_file_name }} exists on Ubuntu 22.04
         if: matrix.os == 'ubuntu-22.04'
