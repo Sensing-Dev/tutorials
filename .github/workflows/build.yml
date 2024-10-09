@@ -41,13 +41,12 @@ jobs:
           
           python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_display.cpp)
           echo "Python script output: $python_output"
-          eval "$python_output"
+          eval "$python_output"  
+          ./fake_camera_display
           
           python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_save.cpp)
           echo "Python script output: $python_output"
           eval "$python_output"
-        
-          ./fake_camera_display
           ./fake_camera_save
           ls ${GITHUB_WORKSPACE}/test/cpp/
 
@@ -58,6 +57,17 @@ jobs:
           python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/${{ matrix.tutorial_file_name}}.cpp)
           echo "Python script output: $python_output"
           eval "$python_output"
+
+      - name:  Memory leak check tutorials 5 on Ubuntu 22.04
+        if: matrix.os == 'ubuntu-22.04' && matrix.tutorial_file_name == 'tutorial5_parse_gendc_data'
+        run: |
+          sudo apt-get update && sudo apt-get install valgrind
+          cd  ${GITHUB_WORKSPACE}/test/cpp
+          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/parse_dummy_gendc_data.cpp
+          echo "Python script output: $python_output"
+          eval "$python_output"
+          valgrind --leak-check=full ./parse_dummy_gendc_data --use-dummy-data
+          
 
       - name: Check if ${{ matrix.tutorial_file_name }} exists on Ubuntu 22.04
         if: matrix.os == 'ubuntu-22.04'
