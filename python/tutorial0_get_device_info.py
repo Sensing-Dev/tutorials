@@ -17,7 +17,8 @@ if __name__ == "__main__":
 
     for i in range(num_device):
     # Access to the ith device
-        device = Aravis.Camera.new(Aravis.get_device_id(i)).get_device()
+        deviceid = Aravis.get_device_id(i)
+        device = Aravis.Camera.new(deviceid).get_device()
         # Get GenICam feature values
         devicemodelname = device.get_string_feature_value("DeviceModelName")
         width = device.get_integer_feature_value("Width")
@@ -30,6 +31,7 @@ if __name__ == "__main__":
 
         # Display the obtained device information
         print("=== device {} information ===========================".format(i))
+        print("{0:20s} : {1}".format("Device ID", deviceid))
         print("{0:20s} : {1}".format("Device Model Name", devicemodelname))
         print("{0:20s} : {1}".format("Wdith", width))
         print("{0:20s} : {1}".format("Height", height))
