@@ -1,6 +1,6 @@
 /*
 
-g++ src/tutorial5_parse_gendc_data.cpp -o tutorial5_parse_gendc_data \
+g++ src/parse_gendc_data_dummy.cpp -o parse_gendc_data_dummy \
 -I /opt/sensing-dev/include/opencv4 \
 -I /opt/sensing-dev/include \
 -L /opt/sensing-dev/lib \
@@ -180,8 +180,8 @@ int main(int argc, char* argv[]){
                     // API to get PixelFormat would be added in the future
                     int32_t image_component_header_offset = *reinterpret_cast<int32_t *>(filecontent + cursor + 56 + 8 * image_component_index);
                     int32_t pfnc_pixelformat = *reinterpret_cast<int32_t *>(filecontent + cursor + image_component_header_offset + 40);
-                    int32_t num_bitshift = getBitShift(pfnc_pixelformat);   
-                
+                    int32_t num_bitshift = getBitShift(pfnc_pixelformat);
+
                     int part_count = image_component.getPartCount();
                     std::cout << "\tData Channel: " << part_count << std::endl;
 
@@ -213,14 +213,14 @@ int main(int argc, char* argv[]){
                         std::memcpy(img.ptr(), imagedata, part_data_size);
                         img = img * pow(2, num_bitshift);
 
-                        cv::imshow("First available image component", img);
+//                        cv::imshow("First available image component", img);
+//
+//                        if (user_dummy_data){
+//                            cv::waitKeyEx(0);
+//                        }else{
+//                            cv::waitKeyEx(1);
+//                        }
 
-                        if (user_dummy_data){
-                            cv::waitKeyEx(0);
-                        }else{
-                            cv::waitKeyEx(1);
-                        }
-                        
                 // Access to Comp 0, Part 0's TypeSpecific 3 (where typespecific count start with 1; therefore, index is 2)
                         int64_t typespecific3 = part.getTypeSpecificByIndex(2);
                         // Access to the first 4-byte of typespecific3
@@ -230,7 +230,7 @@ int main(int argc, char* argv[]){
                         part_data_cursor +=  part_data_size;
 
                         delete[] imagedata;
-                    }                
+                    }
                 }else{
                     if (first_container){
                         std::cout << "Skip Image Component - This GenDC does not have component of typeId " << ComponentIDIntensity << std::endl;
@@ -343,12 +343,12 @@ int main(int argc, char* argv[]){
                 first_container = false;
             }
         }else{
-            std::cout << "This is not GenDC Format data.\n" << 
-                "If you save this with image_io_binarysaver_u{}x{} BB, the data structure is\n" << 
-                "\n" << 
-                "| framecount0 | imagedata0 | framecount1 | imagedata1 | framecount2 | imagedata2 | ... |\n" << 
-                "\n" << 
-                "framecount is 4 byte-length, and imagedata size is width * height * byte-depth * number of channel, " << 
+            std::cout << "This is not GenDC Format data.\n" <<
+                "If you save this with image_io_binarysaver_u{}x{} BB, the data structure is\n" <<
+                "\n" <<
+                "| framecount0 | imagedata0 | framecount1 | imagedata1 | framecount2 | imagedata2 | ... |\n" <<
+                "\n" <<
+                "framecount is 4 byte-length, and imagedata size is width * height * byte-depth * number of channel, " <<
                 "which you may be able to find/calculate from config.json file." << std::endl;
                 std::cout << "Note that framecount is not frame id. Some device may not have this number, and if so, it is filled with 0." << std::endl;
             throw std::runtime_error("This is not GenDC Format");
@@ -356,5 +356,5 @@ int main(int argc, char* argv[]){
         delete[] filecontent;
     }
 
-    return 0; 
+    return 0;
 }
