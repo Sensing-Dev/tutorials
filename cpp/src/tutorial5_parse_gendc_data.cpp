@@ -304,7 +304,7 @@ int main(int argc, char* argv[]){
                 int32_t pmod_sourceId = 0x4001;
                 int pmod_component_index = gendc_descriptor.getFirstComponentIndexBySourceId(pmod_sourceId);
                 if (pmod_component_index != -1){
-                    std::cout << "First available analog data component is Comp " << pmod_component_index << std::endl;
+                    std::cout << "First available pmod data component is Comp " << pmod_component_index << std::endl;
                     ComponentHeader pmod_component = gendc_descriptor.getComponentByIndex(pmod_component_index);
 
                     int pmod_part_count = pmod_component.getPartCount();
@@ -338,9 +338,6 @@ int main(int argc, char* argv[]){
                 cursor += static_cast<int32_t>(descriptor_size + container_data_size);
                 first_container = false;
             }
-
-
-            delete[] filecontent;
         }else{
             std::cout << "This is not GenDC Format data.\n" << 
                 "If you save this with image_io_binarysaver_u{}x{} BB, the data structure is\n" << 
@@ -352,6 +349,9 @@ int main(int argc, char* argv[]){
                 std::cout << "Note that framecount is not frame id. Some device may not have this number, and if so, it is filled with 0." << std::endl;
             throw std::runtime_error("This is not GenDC Format");
         }
+
+        delete[] filecontent;
+        
     }
 
     return 0; 
