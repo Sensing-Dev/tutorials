@@ -19,6 +19,10 @@ int main(int argc, char *argv[])
         printf("=== device {%d} information ===========================\n", i);
 
         printf("%20s : %s\n",
+                    "Device ID",
+                    arv_get_device_id(i));
+
+        printf("%20s : %s\n",
             "Device Model Name",
             arv_device_get_string_feature_value(device, "DeviceModelName", &error));
         if (error){
