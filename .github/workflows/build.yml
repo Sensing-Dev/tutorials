@@ -11,7 +11,6 @@ jobs:
     env: 
       LD_LIBRARY_PATH: /opt/sensing-dev/lib:/opt/sensing-dev/lib/x86_64-linux-gnu
       SDK_VERSION: v24.09.04
-      LATEST_OPENCV_VERSION: 4.10.0
     strategy:
         matrix:
           os: [ubuntu-22.04, windows-2019, windows-2022]
@@ -79,28 +78,12 @@ jobs:
           files: cpp/${{ matrix.tutorial_file_name}}
           fail: true
 
-      - name: Install sensing-dev SDK on Windows MSVC 2019
-        if: matrix.os == 'windows-2019'
+      - name: Install sensing-dev SDK on Windows MSVC 2019 & 2022
         run: |
           mkdir setup_dir && cd setup_dir
           Invoke-WebRequest -Uri https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${{ env.SDK_VERSION }}/installer.ps1 -OutFile installer.ps1 -Verbose
           powershell.exe -ExecutionPolicy Bypass -File ./installer.ps1 -user $env:USERNAME -version ${{ env.SDK_VERSION }} -InstallOpenCV
           echo 'SENSING_DEV_ROOT=$env:SENSING_DEV_ROOT' >> $GITHUB_ENV
-
-      - name: Install sensing-dev SDK on Windows MSVC 2022
-        if: matrix.os == 'windows-2022'
-        run: |
-          mkdir setup_dir && cd setup_dir
-          Invoke-WebRequest -Uri https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${{ env.SDK_VERSION }}/installer.ps1 -OutFile installer.ps1 -Verbose
-          powershell.exe -ExecutionPolicy Bypass -File ./installer.ps1 -user $env:USERNAME -version ${{ env.SDK_VERSION }}
-          echo 'SENSING_DEV_ROOT=$env:SENSING_DEV_ROOT' >> $GITHUB_ENV
-
-      - name: Install OpenCV separately on Windows MSVC 2022
-        if: matrix.os == 'windows-2022'
-        run: | 
-          $targetDir= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
-          Invoke-WebRequest -Uri https://github.com/opencv/opencv/releases/download/${{ env.LATEST_OPENCV_VERSION }}/opencv-${{ env.LATEST_OPENCV_VERSION }}-windows.exe -OutFile opencv-${{ env.LATEST_OPENCV_VERSION }}-windows.exe 
-          Start-Process -FilePath opencv-${{ env.LATEST_OPENCV_VERSION }}-windows.exe -ArgumentList "-o`"$targetDir`" -y" -Wait
 
       - name: Check if OpenCV exists on Windows
         if: ${{ (matrix.os == 'windows-2019') || (matrix.os == 'windows-2022') }}
