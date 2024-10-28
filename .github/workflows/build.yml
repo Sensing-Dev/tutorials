@@ -79,6 +79,7 @@ jobs:
           fail: true
 
       - name: Install sensing-dev SDK on Windows MSVC 2019 & 2022
+        if: ${{ (matrix.os == 'windows-2019') || (matrix.os == 'windows-2022') }}
         run: |
           mkdir setup_dir && cd setup_dir
           Invoke-WebRequest -Uri https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${{ env.SDK_VERSION }}/installer.ps1 -OutFile installer.ps1 -Verbose
