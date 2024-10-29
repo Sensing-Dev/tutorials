@@ -37,22 +37,6 @@ jobs:
           chmod +x ${GITHUB_WORKSPACE}/setup_dir/setup.sh
           sudo bash ${GITHUB_WORKSPACE}/setup_dir/setup.sh --install-opencv -v $dl_version
 
-      - name: Build fake camera examples with GCC
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          export GENICAM_FILENAME=${GITHUB_WORKSPACE}/test/cpp/src/arv-fake-camera.xml
-          cd  ${GITHUB_WORKSPACE}/test/cpp
-
-          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_display.cpp)
-          echo "Python script output: $python_output"
-          eval "$python_output"
-          ./fake_camera_display
-
-          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py ${GITHUB_WORKSPACE}/test/cpp/src/fake_camera_save.cpp)
-          echo "Python script output: $python_output"
-          eval "$python_output"
-          ./fake_camera_save
-
       - name: Build ${{ matrix.tutorial_file_name}} with GCC
         if: matrix.os == 'ubuntu-22.04'
         run: |
@@ -76,13 +60,6 @@ jobs:
 
           valgrind --leak-check=full ./$executable --use-dummy-data
 
-      - name: Check if ${{ matrix.tutorial_file_name }} exists on Ubuntu 22.04
-        if: matrix.os == 'ubuntu-22.04'
-        uses: andstor/file-existence-action@v3
-        with:
-          files: cpp/${{ matrix.tutorial_file_name}}
-          fail: true
-
       - name: Install sensing-dev SDK on Windows MSVC 2019 & 2022
         if: ${{ (matrix.os == 'windows-2019') || (matrix.os == 'windows-2022') }}
         run: |
@@ -90,39 +67,6 @@ jobs:
           Invoke-WebRequest -Uri https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${{ env.SDK_VERSION }}/installer.ps1 -OutFile installer.ps1 -Verbose
           powershell.exe -ExecutionPolicy Bypass -File ./installer.ps1 -user $env:USERNAME -version ${{ env.SDK_VERSION }} -InstallOpenCV
           echo 'SENSING_DEV_ROOT=$env:SENSING_DEV_ROOT' >> $GITHUB_ENV
-
-      - name: Check if OpenCV exists on Windows
-        if: ${{ (matrix.os == 'windows-2019') || (matrix.os == 'windows-2022') }}
-        id: check_file
-        run: |
-          $filePath = "${env:LOCALAPPDATA}\sensing-dev\opencv"
-          if (Test-Path $filePath) {
-            Write-Output "File exists: $filePath"
-            Write-Output "::set-output name=file_exists::true"
-          } else {
-            Write-Output "File does not exist: $filePath"
-            Write-Output "::set-output name=file_exists::false"
-            exit 1
-          }
-
-      - name: Build fake camera examples on Windows
-        if: ${{ (matrix.os == 'windows-2019') || (matrix.os == 'windows-2022') }}
-        run: |
-          $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
-          Write-Host PATH = $PATH
-          $env:PATH="$env:PATH;$PATH"
-          
-          $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
-          Write-Host SENSING_DEV_ROOT = $SENSING_DEV_ROOT
-          $env:SENSING_DEV_ROOT=${SENSING_DEV_ROOT}
-        
-          cd test/cpp
-          mkdir build && cd build
-          cmake  ../
-          cmake --build . --config Release && cd Release
-          $ENV:GENICAM_FILENAME = "../..//src/arv-fake-camera.xml" 
-          ./fake_camera_display
-          ./fake_camera_save
 
       - name: Build ${{ matrix.tutorial_file_name}} on Windows
         if: ${{ (matrix.os == 'windows-2019') || (matrix.os == 'windows-2022') }}
@@ -144,7 +88,70 @@ jobs:
           cmake --trace-expand ../ -DBUILD_TUTORIAL=${{ matrix.tutorial_file_name}}
           cmake --build . --config Release
 
-  
+  fake-test-cpp:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+        tutorial_file_name: [fake_camera_display, fake_camera_save]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+        with:
+          submodules: recursive
+
+      - name: Install sensing-dev SDK on Ubuntu 22.04
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          dl_version=$(echo ${{ env.SDK_VERSION }} | cut -d'-' -f1)
+          echo "$dl_version will be installed"
+          mkdir setup_dir && cd setup_dir
+          wget -O setup.sh https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${{ env.SDK_VERSION}}/setup.sh
+          chmod +x ${GITHUB_WORKSPACE}/setup_dir/setup.sh
+          sudo bash ${GITHUB_WORKSPACE}/setup_dir/setup.sh --install-opencv -v $dl_version
+
+      - name: Build and run ${{ matrix.tutorial_file_name}} with GCC
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          export GENICAM_FILENAME=${GITHUB_WORKSPACE}/test/cpp/src/arv-fake-camera.xml
+          cd  ${GITHUB_WORKSPACE}/test
+
+          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py cpp/src/${{ matrix.tutorial_file_name}}.cpp)
+          echo "Python script output: $python_output"
+          eval "$python_output"
+          ./${{ matrix.tutorial_file_name}}
+
+        env: 
+          GENICAM_FILENAME: arv-fake-camera.xml
+
+      - name: Install sensing-dev SDK on Windows MSVC
+        if: matrix.os == 'windows-2022'
+        run: |
+          mkdir setup_dir && cd setup_dir
+          Invoke-WebRequest -Uri https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${{ env.SDK_VERSION }}/installer.ps1 -OutFile installer.ps1 -Verbose
+          powershell.exe -ExecutionPolicy Bypass -File ./installer.ps1 -user $env:USERNAME -version ${{ env.SDK_VERSION }} -InstallOpenCV
+          echo 'SENSING_DEV_ROOT=$env:SENSING_DEV_ROOT' >> $GITHUB_ENV
+
+      - name: Build and run ${{ matrix.tutorial_file_name}} on Windows
+        if: matrix.os == 'windows-2022'
+        run: |
+          $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
+          Write-Host PATH = $PATH
+          $env:PATH="$env:PATH;$PATH"
+          
+          $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
+          Write-Host SENSING_DEV_ROOT = $SENSING_DEV_ROOT
+          $env:SENSING_DEV_ROOT=${SENSING_DEV_ROOT}
+        
+          cd test/cpp
+          mkdir build && cd build
+          cmake ../ -DBUILD_TUTORIAL=${{ matrix.tutorial_file_name}}
+          cmake --build . --config Release
+          ./Release/${{ matrix.tutorial_file_name}}
+
+        env: 
+          GENICAM_FILENAME: ../../arv-fake-camera.xml
+
   fake-test-python:
     runs-on: ${{ matrix.os }}
     strategy:
