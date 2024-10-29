@@ -5,12 +5,17 @@ on:
     branches:
       - '*'  # This will run the build and test jobs for pull requests to all branches
 
+env:
+  SDK_VERSION: v24.09.04
+  ION_CONTRIB_PYTHON: 3.2.3
+  ARAVIS_PYTHON: 0.8.31
+  GENDC_PYTHON: 0.3.3
+
 jobs:
   test-cpp:
     runs-on: ${{ matrix.os }}
     env: 
       LD_LIBRARY_PATH: /opt/sensing-dev/lib:/opt/sensing-dev/lib/x86_64-linux-gnu
-      SDK_VERSION: v24.09.04
     strategy:
         matrix:
           os: [ubuntu-22.04, windows-2019, windows-2022]
@@ -138,3 +143,29 @@ jobs:
           mkdir build && cd build
           cmake --trace-expand ../ -DBUILD_TUTORIAL=${{ matrix.tutorial_file_name}}
           cmake --build . --config Release
+
+  
+  fake-test-python:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+        tutorial_file_name: [fake_camera_display, fake_camera_save]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+        with:
+          submodules: recursive
+
+      - name: Install python modules
+        run: |
+          pip install ion-contrib-python==${{ env.ION_CONTRIB_PYTHON }}
+      
+      - name: Run fake camera display
+        run: |
+          cd test
+          python python/${{ matrix.tutorial_file_name}}
+        env: 
+          GENICAM_FILENAME: "."
+          
