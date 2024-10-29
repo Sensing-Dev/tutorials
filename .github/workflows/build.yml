@@ -165,9 +165,7 @@ jobs:
       - name: Run fake camera display
         run: |
           cd test
-          cd python
-          ls
-          python ${{ matrix.tutorial_file_name}}
+          python python/${{ matrix.tutorial_file_name}}.py
         env: 
-          GENICAM_FILENAME: "../"
+          GENICAM_FILENAME: "."
           
