@@ -167,5 +167,5 @@ jobs:
           cd test
           python python/${{ matrix.tutorial_file_name}}.py
         env: 
-          GENICAM_FILENAME: ${GITHUB_WORKSPACE}/test/arv-fake-camera.xml
+          GENICAM_FILENAME: arv-fake-camera.xml
           
