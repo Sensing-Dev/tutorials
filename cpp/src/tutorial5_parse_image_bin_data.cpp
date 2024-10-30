@@ -120,12 +120,16 @@ int main(int argc, char* argv[]){
     std::string prefix = "image0-";
     bool display_image = true;
 
-    if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--directory") == 0){
-        directory_name = argv[++i];
-    } else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0){
-        display_image = false;
+    if (argc > 1){
+        for (int i = 1; i < argc; i++){
+            if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--directory") == 0){
+                directory_name = argv[++i];
+            } else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0){
+                display_image = false;
+            }
+        }
     }
-
+    
     if (!std::filesystem::exists(directory_name)) {
         std::cerr << "Error: Directory '" << directory_name << "' does not exist.\n";
         return 1;
@@ -190,7 +194,7 @@ int main(int argc, char* argv[]){
                 cv::imshow("First available image component", img);
                 cv::waitKeyEx(1);
             }
-            
+
             cursor += 4 + framesize;
         }
         delete[] filecontent;
