@@ -117,6 +117,19 @@ jobs:
         env: 
           GENICAM_FILENAME: ../arv-fake-camera.xml
 
+      - name:  Memory leak check tutorial5_parse_image_bin_data on Ubuntu 22.04 with dummy image data saved by ${{ matrix.tutorial_file_name}}
+        if: ${{ (matrix.os == 'ubuntu-22.04') && (matrix.tutorial_file_name == 'fake_camera_save') }}
+        run: |
+          sudo apt-get -y update && sudo apt-get install -y valgrind
+          cd  ${GITHUB_WORKSPACE}/cpp
+          python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/tutorial5_parse_image_bin_data.cpp)
+          echo "Python script output: $python_output"
+          eval "$python_output"
+
+          cp ${GITHUB_WORKSPACE}/test/cpp/tutorial_save_image*/* cd  ${GITHUB_WORKSPACE}/cpp
+
+          valgrind --leak-check=full ./tutorial5_parse_image_bin_data --use-dummy-data --quiet
+
       - name: Install sensing-dev SDK on Windows MSVC
         if: matrix.os == 'windows-2022'
         run: |

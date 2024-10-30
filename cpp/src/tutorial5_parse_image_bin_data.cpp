@@ -118,6 +118,13 @@ int main(int argc, char* argv[]){
 
     std::string directory_name = "tutorial_save_image_bin_XXXXXXXXXXXXXXXXXX";
     std::string prefix = "image0-";
+    bool display_image = true;
+
+    if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--directory") == 0){
+        directory_name = argv[++i];
+    } else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0){
+        display_image = false;
+    }
 
     if (!std::filesystem::exists(directory_name)) {
         std::cerr << "Error: Directory '" << directory_name << "' does not exist.\n";
@@ -178,10 +185,13 @@ int main(int argc, char* argv[]){
             cv::Mat img(h, w, getOpenCVMatType(d, c));
             std::memcpy(img.ptr(), filecontent + cursor + 4, framesize);
             img = img * pow(2, num_bitshift);
-            cv::imshow("First available image component", img);
+            
+            if (display_image){
+                cv::imshow("First available image component", img);
+                cv::waitKeyEx(1);
+            }
+            
             cursor += 4 + framesize;
-
-            cv::waitKeyEx(1);
         }
         delete[] filecontent;
     }
