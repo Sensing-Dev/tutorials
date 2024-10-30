@@ -128,7 +128,7 @@ jobs:
 
           cp ${GITHUB_WORKSPACE}/test/cpp/tutorial_save_image*/* ${GITHUB_WORKSPACE}/cpp
 
-          valgrind --leak-check=full ./tutorial5_parse_image_bin_data --use-dummy-data --quiet
+          valgrind --leak-check=full ./tutorial5_parse_image_bin_data --directory . --quiet
 
       - name: Install sensing-dev SDK on Windows MSVC
         if: matrix.os == 'windows-2022'
