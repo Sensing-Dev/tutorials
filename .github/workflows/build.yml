@@ -51,8 +51,8 @@ jobs:
           sudo apt-get -y update && sudo apt-get install -y valgrind
           cd  ${GITHUB_WORKSPACE}/cpp
           wget https://raw.githubusercontent.com/Sensing-Dev/GenDC/main/test/generated_stub/output.bin
-          
-          valgrind --leak-check=full ./${{ matrix.tutorial_file_name}} --use-dummy-data
+
+          valgrind --leak-check=full ./${{ matrix.tutorial_file_name}} --use-dummy-data --quiet
 
       - name: Install sensing-dev SDK on Windows MSVC 2019 & 2022
         if: ${{ (matrix.os == 'windows-2019') || (matrix.os == 'windows-2022') }}
@@ -84,6 +84,8 @@ jobs:
 
   fake-test-cpp:
     runs-on: ${{ matrix.os }}
+    env: 
+      LD_LIBRARY_PATH: /opt/sensing-dev/lib:/opt/sensing-dev/lib/x86_64-linux-gnu
     strategy:
       matrix:
         os: [ubuntu-22.04, windows-2022]
@@ -107,16 +109,13 @@ jobs:
       - name: Build and run ${{ matrix.tutorial_file_name}} with GCC
         if: matrix.os == 'ubuntu-22.04'
         run: |
-          export GENICAM_FILENAME=${GITHUB_WORKSPACE}/test/cpp/src/arv-fake-camera.xml
           cd  ${GITHUB_WORKSPACE}/test/cpp
-
           python_output=$(python ${GITHUB_WORKSPACE}/.github/get_compile_command.py src/${{ matrix.tutorial_file_name}}.cpp)
           echo "Python script output: $python_output"
           eval "$python_output"
           ./${{ matrix.tutorial_file_name}}
-
         env: 
-          GENICAM_FILENAME: arv-fake-camera.xml
+          GENICAM_FILENAME: ../arv-fake-camera.xml
 
       - name: Install sensing-dev SDK on Windows MSVC
         if: matrix.os == 'windows-2022'

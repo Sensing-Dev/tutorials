@@ -92,6 +92,7 @@ int main(int argc, char* argv[]){
     std::string directory_name = ".";
     bool user_dummy_data = false;
     std::string prefix = "gendc0-";
+    bool display_image = true;
 
     if (argc > 1){
         for (int i = 1; i < argc; i++){
@@ -99,6 +100,8 @@ int main(int argc, char* argv[]){
                 directory_name = argv[++i];
             } else if (strcmp(argv[i], "-u") == 0 || strcmp(argv[i], "--use-dummy-data") == 0){
                 user_dummy_data = true;
+            } else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0){
+                display_image = false;
             }
         }
     }
@@ -213,12 +216,14 @@ int main(int argc, char* argv[]){
                         std::memcpy(img.ptr(), imagedata, part_data_size);
                         img = img * pow(2, num_bitshift);
 
-                        cv::imshow("First available image component", img);
+                        if (display_image){
+                            cv::imshow("First available image component", img);
 
-                        if (user_dummy_data){
-                            cv::waitKeyEx(0);
-                        }else{
-                            cv::waitKeyEx(1);
+                            if (user_dummy_data){
+                                cv::waitKeyEx(0);
+                            }else{
+                                cv::waitKeyEx(1);
+                            }
                         }
                         
                 // Access to Comp 0, Part 0's TypeSpecific 3 (where typespecific count start with 1; therefore, index is 2)
