@@ -93,7 +93,9 @@ int build_and_process_pipeline(std::vector<int32_t>& payloadsize, int num_device
     // bind halide buffer for output port
     n["output"].bind(outputs[0]);
 
-    int32_t num_run = 0;
+    int32_t num_run = 1;
+    // first run
+    b.run();
 
     std::cout << "Hit SPACE KEY to stop saving" << std::endl;
 

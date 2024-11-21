@@ -64,7 +64,8 @@ if __name__ == "__main__":
         payloadsize_ps[i].bind(payloadsize[i])
     
 
-    num_run = 0
+    num_run = 1
+    builder.run()
     print("Press ctrl-C to stop saving")
     try:
         while True:
