@@ -99,7 +99,9 @@ int build_and_process_pipeline(
         child_n["output"].bind(outputs[i]);
     }
 
-    int32_t num_run = 0;
+    int32_t num_run = 1;
+    // first run
+    b.run();
 
     std::cout << "Hit SPACE KEY to stop saving" << std::endl;
 

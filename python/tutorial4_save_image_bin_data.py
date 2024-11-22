@@ -67,7 +67,8 @@ if __name__ == "__main__":
         height_ps[i].bind(height[i])
     
 
-    num_run = 0
+    num_run = 1
+    builder.run()
     print("Press ctrl-C to stop saving")
     try:
         while True:
