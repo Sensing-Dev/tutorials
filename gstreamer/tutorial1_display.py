@@ -1,16 +1,18 @@
 import os
 if os.name == 'nt':
     os.add_dll_directory(os.path.join(os.environ["SENSING_DEV_ROOT"], "bin"))
-# import cv2
+# linux: please install sensing-dev c++ version and export GST_PLUGIN_PATH=/opt/sensing-dev/lib/x86_64-linux-gnu/gstreamer-1.0
+import cv2
 
 if __name__ == "__main__":
     camera_name = ''
+    # camera_name = 'sensor name here'
     pixelformat = 'GRAY8'
     width = 1920
     height = 1080
     framerate = 60
 
-    pipeline = 'aravissrc camera-name={} ! \
+    pipeline = 'aravissrc camera-name="{}" ! \
     gendcseparator name=sep ! queue ! fakesink \
     sep.component_src0 ! queue ! video/x-raw,format={},width={},height={},framerate={}/1 ! videoconvert ! appsink'.format(camera_name, pixelformat, width, height, framerate)
 
