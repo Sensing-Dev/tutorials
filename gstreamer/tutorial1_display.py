@@ -23,9 +23,8 @@ if __name__ == "__main__":
         else 4 if pixelformat == "Mono12" \
         else 6 if pixelformat == "Mono10" \
         else 0
-    if pixelformat.startswith("Mono"):
-        is_color = False
-    else:
+    
+    if pixelformat.startswith("RGB") or pixelformat.startswith("Bayer") :
         is_color = True
 
     if is_color:
