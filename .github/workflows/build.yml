@@ -2,8 +2,7 @@ name: Build Test on GCC and MSVC
 
 on:
   pull_request:
-    branches:
-      - '*'  # This will run the build and test jobs for pull requests to all branches
+      branches: [ release/v24.05 ]
 
 jobs:
   test-cpp:
