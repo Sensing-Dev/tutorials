@@ -2,15 +2,14 @@ name: Build Test on GCC and MSVC
 
 on:
   pull_request:
-    branches:
-      - '*'  # This will run the build and test jobs for pull requests to all branches
+      branches: [ release/v24.05 ]
 
 jobs:
   test-cpp:
     runs-on: ${{ matrix.os }}
     env: 
       LD_LIBRARY_PATH: /opt/sensing-dev/lib:/opt/sensing-dev/lib/x86_64-linux-gnu
-      SDK_VERSION: v24.05.09
+      SDK_VERSION: v24.05.11
       LATEST_OPENCV_VERSION: 4.10.0
     strategy:
         matrix:
