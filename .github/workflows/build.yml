@@ -6,9 +6,9 @@ on:
       - '*'  # This will run the build and test jobs for pull requests to all branches
 
 env:
-  SDK_VERSION: v24.09.08
+  SDK_VERSION: v24.12.00
   ION_CONTRIB_PYTHON: 3.2.6
-  ARAVIS_PYTHON: 0.8.31.post1
+  ARAVIS_PYTHON: 0.8.31.dev1
   GENDC_PYTHON: 0.3.5
 
 jobs:
