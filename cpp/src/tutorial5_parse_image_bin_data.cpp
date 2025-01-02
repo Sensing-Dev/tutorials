@@ -23,11 +23,12 @@ g++ src/tutorial5_parse_image_bin_data.cpp -o tutorial5_parse_image_bin_data \
 
 #include <json/json.hpp>
 
-#define Mono8 0x01080001
-#define Mono10 0x01100003
-#define Mono12 0x01100005
-#define RGB8 0x02180014
-#define BGR8 0x02180015
+#include "gendc_common.h"
+int32_t Mono8 = gendc::pfnc::convert_pixelformat("Mono8");
+int32_t Mono10 = gendc::pfnc::convert_pixelformat("Mono10");
+int32_t Mono12 = gendc::pfnc::convert_pixelformat("Mono12");
+int32_t RGB8 = gendc::pfnc::convert_pixelformat("RGB8");
+int32_t BGR8 = gendc::pfnc::convert_pixelformat("BGR8");
 
 int positive_pow(int base, int expo){
   if (expo <= 0){

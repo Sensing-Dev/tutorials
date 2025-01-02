@@ -20,17 +20,16 @@ g++ src/tutorial5_parse_gendc_data.cpp -o tutorial5_parse_gendc_data \
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
-
-#include "gendc_separator/ContainerHeader.h"
-#include "gendc_separator/tools.h"
+#include "gendc_common.h"
+using namespace gendc;
 
 #define ComponentIDIntensity 1
 
-#define Mono8 0x01080001
-#define Mono10 0x01100003
-#define Mono12 0x01100005
-#define RGB8 0x02180014
-#define BGR8 0x02180015
+int32_t Mono8 = pfnc::convert_pixelformat("Mono8");
+int32_t Mono10 = pfnc::convert_pixelformat("Mono10");
+int32_t Mono12 = pfnc::convert_pixelformat("Mono12");
+int32_t RGB8 = pfnc::convert_pixelformat("RGB8");
+int32_t BGR8 = pfnc::convert_pixelformat("BGR8");
 
 int positive_pow(int base, int expo){
   if (expo <= 0){
