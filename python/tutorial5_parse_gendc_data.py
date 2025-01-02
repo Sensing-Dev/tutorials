@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 
 from gendc_python.gendc_separator import descriptor as gendc
+from gendc_python.genicam import tool as genicam
 
 GDC_INTENSITY = 1
 
@@ -21,9 +22,12 @@ if __name__ == "__main__":
                         help='Directory that has bin files')
     parser.add_argument('-u', '--use-dummy-data', \
                         action='store_true', help='Use Dummy data downloaded from Sensing-Dev/GenDC.')
+    parser.add_argument('-q', '--quiet', \
+                        action='store_true', help='Disable image display')
 
     directory_name = parser.parse_args().directory
     use_dummy_data = parser.parse_args().use_dummy_data
+    image_display = not parser.parse_args().quiet
     prefix = "gendc0-"
 
     num_device = 1
@@ -93,18 +97,19 @@ if __name__ == "__main__":
                         # Access to the first 4-byte of typespecific3
                         print("Framecount: ", int.from_bytes(typespecific3.to_bytes(8, 'little')[0:4], "little")) 
 
-                        width = dimension[0]
-                        height = dimension[1]
-                        if byte_depth == 1:
-                            image = np.frombuffer(part.get_data(), dtype=np.uint8).reshape((height, width)).copy()
-                        elif byte_depth == 2:
-                            image = np.frombuffer(part.get_data(), dtype=np.uint16).reshape((height, width)).copy()
-                        image *= coef
-                        cv2.imshow("First available image component", image)
-                        if use_dummy_data:
-                            cv2.waitKey(0)
-                        else:
-                            cv2.waitKey(1)
+                        if image_display:
+                            width = dimension[0]
+                            height = dimension[1]
+                            if byte_depth == 1:
+                                image = np.frombuffer(part.get_data(), dtype=np.uint8).reshape((height, width)).copy()
+                            elif byte_depth == 2:
+                                image = np.frombuffer(part.get_data(), dtype=np.uint16).reshape((height, width)).copy()
+                            image *= coef
+                            cv2.imshow("First available image component", image)
+                            if use_dummy_data:
+                                cv2.waitKey(0)
+                            else:
+                                cv2.waitKey(1)
                 else:
                     if first_container:
                         print("Skip Image Component - This GenDC does not have component of typeId", GDC_INTENSITY)
