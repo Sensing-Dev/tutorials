@@ -9,11 +9,11 @@ from gendc_python.genicam import tool as genicam
 
 GDC_INTENSITY = 1
 
-Mono8 = 0x01080001
-Mono10 = 0x01100003
-Mono12 = 0x01100005
-RGB8 = 0x02180014
-BGR8 = 0x02180015
+Mono8 = genicam.pfnc_convert_pixelformat("Mono8")
+Mono10 = genicam.pfnc_convert_pixelformat("Mono10")
+Mono12 = genicam.pfnc_convert_pixelformat("Mono12")
+RGB8 = genicam.pfnc_convert_pixelformat("RGB8")
+BGR8 = genicam.pfnc_convert_pixelformat("BGR8")
 
 if __name__ == "__main__":
 
