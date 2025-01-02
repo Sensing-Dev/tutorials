@@ -179,10 +179,7 @@ int main(int argc, char* argv[]){
                     ComponentHeader image_component = gendc_descriptor.getComponentByIndex(image_component_index);
                     std::cout << "First available image data component is Comp " << image_component_index << std::endl;
 
-                    // Get PixelFormat
-                    // API to get PixelFormat would be added in the future
-                    int32_t image_component_header_offset = *reinterpret_cast<int32_t *>(filecontent + cursor + 56 + 8 * image_component_index);
-                    int32_t pfnc_pixelformat = *reinterpret_cast<int32_t *>(filecontent + cursor + image_component_header_offset + 40);
+                    int32_t pfnc_pixelformat = image_component.getFormat();
                     int32_t num_bitshift = getBitShift(pfnc_pixelformat);   
                 
                     int part_count = image_component.getPartCount();
