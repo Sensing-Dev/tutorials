@@ -1,6 +1,6 @@
 /*
 
-g++ src/cuda_tutorial_prototype.cpp -o cuda_tutorial_prototype  \
+g++ src/load_and_process.cpp -o load_and_process  \
 -I /opt/sensing-dev/include -I /opt/sensing-dev/include/aravis-0.8 \
 -I /opt/sensing-dev/include/opencv4 \
 -L /opt/sensing-dev/lib \
