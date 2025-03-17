@@ -128,5 +128,6 @@ echo "Library installation completed."
 VERSION_INFO_FILE="$SDK_DIR/version_info.json"
 if [ -f "$VERSION_INFO_FILE" ]; then
     sed -i "s/\"ion-kit\": \"v[0-9]*\\.[0-9]*\\.[0-9]*\"/\"ion-kit\": \"$BRANCH_OR_TAG(CUDA)\"/" "$VERSION_INFO_FILE"
+    sed -i "s/\"ion-kit\": \"[0-9]*\\.[0-9]*\\.[0-9]*\"/\"ion-kit\": \"$BRANCH_OR_TAG(CUDA)\"/" "$VERSION_INFO_FILE"
     echo "Updated $SDK_DIR/version_info.json"
 fi
