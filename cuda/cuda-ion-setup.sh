@@ -49,6 +49,11 @@ while [[ "$#" -gt 0 ]]; do
     esac
 done
 
+if [[ ! "$BRANCH_OR_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Error: --version must be in the format 'vx.y.z' (e.g., v1.8.10)"
+    exit 1
+fi
+
 # Get git ######################################################################
 sudo apt install git-all -y
 
@@ -68,10 +73,20 @@ export PATH=$VCPKG_DIR:$PATH
 
 # Get Halide ###################################################################
 cd "$WORKING_DIR"
-curl -L https://github.com/halide/Halide/releases/download/v17.0.1/Halide-17.0.1-x86-64-linux-52541176253e74467dabc42eeee63d9a62c199f6.tar.gz --output halide.tar.gz
-tar -xvzf halide.tar.gz
-cd Halide-17.0.1-x86-64-linux
-export HALIDE_PATH="$WORKING_DIR/Halide-17.0.1-x86-64-linux"
+echo $BRANCH_OR_TAG
+if [[ "$BRANCH_OR_TAG" =~ ^v1\.8\.[0-9]+$ ]]; then
+    # v1.8.xx の場合
+    curl -L https://github.com/halide/Halide/releases/download/v16.0.0/Halide-16.0.0-x86-64-linux-1e963ff817ef0968cc25d811a25a7350c8953ee6.tar.gz --output halide.tar.gz
+    tar -xvzf halide.tar.gz
+    cd Halide-16.0.0-x86-64-linux
+    export HALIDE_PATH="$WORKING_DIR/Halide-16.0.0-x86-64-linux"
+else
+    # それ以外の場合（デフォルト）
+    curl -L https://github.com/halide/Halide/releases/download/v17.0.1/Halide-17.0.1-x86-64-linux-52541176253e74467dabc42eeee63d9a62c199f6.tar.gz --output halide.tar.gz
+    tar -xvzf halide.tar.gz
+    cd Halide-17.0.1-x86-64-linux
+    export HALIDE_PATH="$WORKING_DIR/Halide-17.0.1-x86-64-linux"
+fi
 
 # Get ion-kit ##################################################################
 cd "$WORKING_DIR" || exit
@@ -81,12 +96,11 @@ if [ "$BRANCH_OR_TAG" = "latest" ]; then
     BRANCH_OR_TAG="$LATEST_TAG"
 fi
 echo "ion-kit $BRANCH_OR_TAG will be installed..."
-if [ ! -d "$WORKING_DIR/ion-kit" ]; then
-    git clone --branch "$BRANCH_OR_TAG" --depth 1 "https://github.com/$GITHUB_REPO.git"
-else
-    cd ion-kit
-    git checkout $BRANCH_OR_TAG
+if [ -d "$WORKING_DIR/ion-kit" ]; then
+    rm -r "$WORKING_DIR/ion-kit"
 fi
+
+git clone --branch "$BRANCH_OR_TAG" --depth 1 "https://github.com/$GITHUB_REPO.git"
 
 
 # Build and Install ############################################################
