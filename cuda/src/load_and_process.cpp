@@ -26,18 +26,13 @@ g++ src/load_and_process.cpp -o load_and_process  \
 
 using namespace ion;
 std::map<std::string, int32_t> bit_width_map{
-  {"Mono8", 8}, {"Mono10", 16}, {"Mono12", 16}, 
   {"BayerBG8", 8}, {"BayerBG10", 16}, {"BayerBG12", 16}};
 std::map<std::string, int32_t> num_bit_shift_map{
-  {"Mono8", 0}, {"Mono10", 6}, {"Mono12", 4}, 
   {"BayerBG8", 0}, {"BayerBG10", 6}, {"BayerBG12", 4}};
 std::map<std::string, std::string> bb_name{
   {"BayerBG8", "image_io_binaryloader_u8x2"},
   {"BayerBG10", "image_io_binaryloader_u16x2"},
-  {"BayerBG12", "image_io_binaryloader_u16x2"},
-  {"Mono8", "image_io_binaryloader_u8x2"},
-  {"Mono10", "image_io_binaryloader_u16x2"},
-  {"Mono12", "image_io_binaryloader_u16x2"}};
+  {"BayerBG12", "image_io_binaryloader_u16x2"}};
 
 
 void pipeline_acquisition_and_process(bool use_cuda, bool display_image, std::string output_directory, std::string prefix, int width, int height, std::string pixelformat, int num_frames){
@@ -47,7 +42,7 @@ void pipeline_acquisition_and_process(bool use_cuda, bool display_image, std::st
     outputs.push_back(Halide::Buffer<uint8_t>(buf_size));
 
     Buffer<bool> finished(1);
-    
+
     Builder b;
     if (use_cuda){
       b.set_target(get_host_target().with_feature(Target::CUDA).with_feature(Target::Profile));
@@ -67,7 +62,7 @@ void pipeline_acquisition_and_process(bool use_cuda, bool display_image, std::st
     if (bit_width_map[pixelformat] == 8){
       n = b.add("base_cast_2d_uint8_to_uint16")(n["output"]);
     }
-    
+
     n = b.add("image_processing_normalize_raw_image")(n["output"])
       .set_param(
         Param("bit_width", bit_width_map[pixelformat]),
@@ -99,6 +94,7 @@ void pipeline_acquisition_and_process(bool use_cuda, bool display_image, std::st
       std::memcpy(img.ptr(), outputs[0].data(), outputs[0].size_in_bytes());
       if (display_image){
         cv::imshow("image" + std::to_string(0), img);
+        cv::waitKey(1);
       }
 
       if (count_run == num_frames || is_finished) {
@@ -123,7 +119,7 @@ int main(int argc, char *argv[])
     bool display_image = false;
     std::string output_directory = ".";
     int num_frames = 0;
-    
+
     if (argc > 1){
       for (int i = 1; i < argc; i++){
           if (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--target-cuda") == 0){
