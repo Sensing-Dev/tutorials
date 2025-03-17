@@ -49,7 +49,7 @@ while [[ "$#" -gt 0 ]]; do
     esac
 done
 
-if [[ "$BRANCH_OR_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ "$BRANCH_OR_TAG" == "LATEST" ]]; then
+if [[ "$BRANCH_OR_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ "$BRANCH_OR_TAG" == "latest" ]]; then
     echo "Valid --version: $BRANCH_OR_TAG"
 else
     echo "Error: --version must be in the format 'vX.Y.Z' (e.g., v1.8.10)"
