@@ -11,4 +11,6 @@ sudo bash cuda-ion-setup.sh
 ```
 If you are using Sensing-Dev v24.05, please add the option of `--version v1.8.10`.
 
-Note that this install script is desined for Linux x86_64.
+Note that this install script is designed for Linux x86_64. 
+
+After setting up, you can remove the directory called `cuda-setup`.

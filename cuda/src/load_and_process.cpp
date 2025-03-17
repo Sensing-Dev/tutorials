@@ -57,23 +57,23 @@ void pipeline_acquisition_and_process(bool use_cuda, bool display_image, std::st
     b.with_bb_module("ion-bb");
 
     // add binary loader BB to pipeline
-    Node n = b.add(bb_name[pixelformat])()
+    Node n = b.add(bb_name[pixelformat])(&width, &height)
       .set_params(
               Param("output_directory", output_directory),
-              Param("prefix", prefix),
-              Param("width", width),
-              Param("height", height)
+              Param("prefix", prefix)
       );
-
     n["finished"].bind(finished);
 
-    n = b.add("base_cast_2d_uint8_to_uint16")(n["output"]);
+    if (bit_width_map[pixelformat] == 8){
+      n = b.add("base_cast_2d_uint8_to_uint16")(n["output"]);
+    }
+    
     n = b.add("image_processing_normalize_raw_image")(n["output"])
       .set_params(
         Param("bit_width", bit_width_map[pixelformat]),
         Param("bit_shift", num_bit_shift_map[pixelformat])
       );
-    // n = build_pipeline_processing(n["output"][0], b, pixelformat, width, height);
+
     n  = b.add("image_processing_bayer_demosaic_linear")(n["output"])
         .set_params(
           Param("bayer_pattern", "BGGR"),
@@ -106,6 +106,7 @@ void pipeline_acquisition_and_process(bool use_cuda, bool display_image, std::st
       }
       count_run += 1;
     }
+    std::cout << "Total number of frames to process: " << count_run << std::endl;
 }
 
 int main(int argc, char *argv[])
@@ -116,7 +117,7 @@ int main(int argc, char *argv[])
     // check imageX-config.json
     const int32_t width = 1920;
     const int32_t height = 1080;
-    std::string pixelformat = "Mono8";
+    std::string pixelformat = "BayerBG8";
 
     bool use_cuda = false;
     bool display_image = false;
