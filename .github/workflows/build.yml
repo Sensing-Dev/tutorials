@@ -13,7 +13,7 @@ jobs:
       LATEST_OPENCV_VERSION: 4.10.0
     strategy:
         matrix:
-          os: [ubuntu-22.04, windows-2019, windows-2022]
+          os: [ubuntu-22.04, windows-2022]
           tutorial_file_name: [tutorial0_get_device_info, tutorial0_set_device_info, tutorial1_display, tutorial2_control_camera, tutorial3_getting_frame_count, tutorial4_save_gendc_data, tutorial4_save_image_bin_data, tutorial5_parse_gendc_data, tutorial5_parse_image_bin_data]
       
     steps:
@@ -47,14 +47,6 @@ jobs:
           files: cpp/${{ matrix.tutorial_file_name}}
           fail: true
 
-      - name: Install sensing-dev SDK on Windows MSVC 2019
-        if: matrix.os == 'windows-2019'
-        run: |
-          mkdir setup_dir && cd setup_dir
-          Invoke-WebRequest -Uri https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${{ env.SDK_VERSION }}/installer.ps1 -OutFile installer.ps1 -Verbose
-          powershell.exe -ExecutionPolicy Bypass -File ./installer.ps1 -user $env:USERNAME -version ${{ env.SDK_VERSION }} -InstallOpenCV
-          echo 'SENSING_DEV_ROOT=$env:SENSING_DEV_ROOT' >> $GITHUB_ENV
-
       - name: Install sensing-dev SDK on Windows MSVC 2022
         if: matrix.os == 'windows-2022'
         run: |
@@ -71,7 +63,7 @@ jobs:
           Start-Process -FilePath opencv-${{ env.LATEST_OPENCV_VERSION }}-windows.exe -ArgumentList "-o`"$targetDir`" -y" -Wait
 
       - name: Check if OpenCV exists on Windows
-        if: ${{ (matrix.os == 'windows-2019') || (matrix.os == 'windows-2022') }}
+        if: matrix.os == 'windows-2022'
         id: check_file
         run: |
           $filePath = "${env:LOCALAPPDATA}\sensing-dev\opencv"
@@ -85,7 +77,7 @@ jobs:
           }
 
       - name: Build ${{ matrix.tutorial_file_name}} on Windows
-        if: ${{ (matrix.os == 'windows-2019') || (matrix.os == 'windows-2022') }}
+        if: matrix.os == 'windows-2022'
         run: |
           $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
           Write-Host PATH = $PATH
